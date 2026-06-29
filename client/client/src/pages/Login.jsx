@@ -32,31 +32,25 @@ export default function Login() {
     try {
       const response = await api.post("/auth/login", form);
 
-      setMessage(response.data.message || "Login Successful!");
-
-      // Save JWT token if backend sends one
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
 
-      // Redirect after successful login
+      setMessage("Login Successful!");
+
       setTimeout(() => {
         navigate("/");
-      }, 1000);
+      }, 800);
     } catch (err) {
       setIsError(true);
-      setMessage(
-        err.response?.data?.message || "Invalid email or password"
-      );
+      setMessage(err.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-brown from-indigo-100 to-blue-200 flex items-center justify-center px-4">
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-
         <h1 className="text-3xl font-bold text-center text-indigo-600">
           Welcome Back
         </h1>
@@ -78,11 +72,8 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1">Email</label>
 
             <input
               type="email"
@@ -96,9 +87,7 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Password
-            </label>
+            <label className="block text-sm font-medium mb-1">Password</label>
 
             <div className="relative">
               <input
@@ -132,7 +121,6 @@ export default function Login() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-
         </form>
 
         <p className="text-center text-gray-500 mt-6">
@@ -144,7 +132,6 @@ export default function Login() {
             Register
           </Link>
         </p>
-
       </div>
     </div>
   );

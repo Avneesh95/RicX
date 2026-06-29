@@ -1,5 +1,7 @@
 const User = require("../model/UserModel");
+const Order = require("../model/OrderModel");
 
+// Total Users
 const getTotalUsers = async (req, res) => {
   try {
     const count = await User.countDocuments();
@@ -16,27 +18,7 @@ const getTotalUsers = async (req, res) => {
   }
 };
 
-const getTotalRevenue = async (req, res) => {
-  try {
-    const orders = await Order.find({ paymentStatus: "paid" });
-
-    const revenue = orders.reduce((sum, order) => {
-      return sum + order.totalAmount;
-    }, 0);
-
-    res.status(200).json({
-      success: true,
-      revenue,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-
+// Total Orders
 const getTotalOrders = async (req, res) => {
   try {
     const count = await Order.countDocuments();
@@ -53,10 +35,35 @@ const getTotalOrders = async (req, res) => {
   }
 };
 
+// Total Revenue (Optimized)
+const getTotalRevenue = async (req, res) => {
+  try {
+    const result = await Order.aggregate([
+      {
+        $match: { paymentStatus: "paid" },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
 
+    res.status(200).json({
+      success: true,
+      revenue: result.length > 0 ? result[0].totalRevenue : 0,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
-    getTotalOrders,
-    getTotalRevenue,
-    getTotalUsers
-}
+  getTotalUsers,
+  getTotalOrders,
+  getTotalRevenue,
+};
