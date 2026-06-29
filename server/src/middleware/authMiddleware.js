@@ -36,6 +36,29 @@ const authMiddleware = (req, res, next) => {
 };
 
 
+//Make Admin 
+
+const makeAdmin = async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (!user)
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        });
+
+    user.role = req.body.role;
+
+    await user.save();
+
+    res.json({
+        success: true,
+        message: "Role updated successfully"
+    });
+};
+
+
+
 // Full authentication middleware
 const isAuthenticated = async (req, res, next) => {
   try {
@@ -104,4 +127,5 @@ module.exports = {
   authMiddleware,
   isAuthenticated,
   isAdmin,
+  makeAdmin
 };

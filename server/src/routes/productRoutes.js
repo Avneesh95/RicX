@@ -16,11 +16,21 @@ const {
   isAdmin,
 } = require("../middleware/authMiddleware");
 
-// Public
+// ======================
+// Public Routes
+// ======================
+
+// Get all products
 router.get("/", products);
+
+// Get single product
 router.get("/:id", getProductById);
 
-// Admin
+// ======================
+// Admin Routes
+// ======================
+
+// Create product
 router.post(
   "/add",
   isAuthenticated,
@@ -29,6 +39,7 @@ router.post(
   createProduct
 );
 
+// Update product
 router.put(
   "/:id",
   isAuthenticated,
@@ -37,6 +48,7 @@ router.put(
   updateProduct
 );
 
+// Delete product
 router.delete(
   "/:id",
   isAuthenticated,

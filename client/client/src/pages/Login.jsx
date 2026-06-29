@@ -16,10 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -30,55 +27,76 @@ export default function Login() {
     setIsError(false);
 
     try {
-      const response = await api.post("/auth/login", form);
+      const { data } = await api.post("/auth/login", form);
 
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      console.log("LOGIN RESPONSE:", data); // 🔥 DEBUG
+
+      // ✅ SAVE TOKEN
+      if (data?.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      // ✅ SAFE USER SAVE (IMPORTANT FIX)
+      if (data?.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // optional shortcut
+        localStorage.setItem("role", data.user.role || "user");
+      } else {
+        console.warn("No user object in login response!");
       }
 
       setMessage("Login Successful!");
 
       setTimeout(() => {
         navigate("/");
+        window.location.reload(); // 🔥 ensures navbar updates instantly
       }, 800);
+
     } catch (err) {
       setIsError(true);
-      setMessage(err.response?.data?.message || "Invalid email or password");
+      setMessage(
+        err.response?.data?.message || "Invalid email or password"
+      );
     } finally {
       setLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-gradient-to-brown from-indigo-100 to-blue-200 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center px-4">
+
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+
         <h1 className="text-3xl font-bold text-center text-indigo-600">
           Welcome Back
         </h1>
 
         <p className="text-center text-gray-500 mt-2">
-          Login to your RicX account
+          Login to your account
         </p>
 
         {message && (
-          <div
-            className={`mt-5 rounded-lg px-4 py-3 text-sm ${
-              isError
-                ? "bg-red-100 text-red-700 border border-red-300"
-                : "bg-green-100 text-green-700 border border-green-300"
-            }`}
-          >
+          <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${
+            isError
+              ? "bg-red-100 text-red-700 border border-red-300"
+              : "bg-green-100 text-green-700 border border-green-300"
+          }`}>
             {message}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+
+          {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1">
+              Email
+            </label>
 
             <input
               type="email"
               name="email"
-              placeholder="Enter your email"
               value={form.email}
               onChange={handleChange}
               required
@@ -86,14 +104,16 @@ export default function Login() {
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className="block text-sm font-medium mb-1">
+              Password
+            </label>
 
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
-                placeholder="Enter your password"
                 value={form.password}
                 onChange={handleChange}
                 required
@@ -110,6 +130,7 @@ export default function Login() {
             </div>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -121,17 +142,16 @@ export default function Login() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
+
         </form>
 
         <p className="text-center text-gray-500 mt-6">
           Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-indigo-600 font-semibold hover:underline"
-          >
+          <Link to="/register" className="text-indigo-600 font-semibold">
             Register
           </Link>
         </p>
+
       </div>
     </div>
   );

@@ -1,10 +1,33 @@
+import { Outlet, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = () => {
+  const role = localStorage.getItem("role");
+
+  // 🔒 Block non-admin users
+  if (role !== "admin") {
+    return <Navigate to="/" replace />;
+  }
+
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white">
+    <div className="flex min-h-screen bg-gray-100">
+      
+      {/* Sidebar */}
       <Sidebar />
-      <div className="flex-1 p-6">{children}</div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        
+        {/* Top Navbar */}
+        <Navbar />
+
+        {/* Page Content */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <Outlet />
+        </main>
+
+      </div>
     </div>
   );
 };
