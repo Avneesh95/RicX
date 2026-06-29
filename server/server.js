@@ -15,9 +15,6 @@ const cartRoutes = require("./src/routes/cartRoutes");
 
 const port = 4000;
 
-app.use(cors());
-import cors from "cors";
-
 app.use(cors({
   origin: "http://localhost:5173", // Vite default
   credentials: true,

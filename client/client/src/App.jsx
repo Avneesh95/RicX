@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import SignUp from "./pages/Register";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 import OTP from "./pages/Otp";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<SignUp />} />
-        <Route path="/register" element={<SignUp />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTP />} />
       </Routes>
     </BrowserRouter>
