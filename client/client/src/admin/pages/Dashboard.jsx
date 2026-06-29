@@ -19,22 +19,26 @@ const Dashboard = () => {
     revenue: 0,
   });
 
+  const [recentOrders, setRecentOrders] = useState([]);
+  const [latestUsers, setLatestUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboard = async () => {
       try {
-        const productRes = await api.get("/products");
+        const res = await api.get("/admin/dashboard");
 
-        const products =
-          productRes.data.product || productRes.data || [];
+        const data = res.data;
 
         setStats({
-          products: products.length,
-          users: 58, // 🔥 placeholder (until backend users API)
-          orders: 245, // 🔥 placeholder
-          revenue: 142000, // 🔥 placeholder
+          products: data.products || 0,
+          users: data.users || 0,
+          orders: data.orders || 0,
+          revenue: data.revenue || 0,
         });
+
+        setRecentOrders(data.recentOrders || []);
+        setLatestUsers(data.latestUsers || []);
       } catch (err) {
         console.error("Dashboard error:", err);
       } finally {
@@ -42,8 +46,16 @@ const Dashboard = () => {
       }
     };
 
-    fetchStats();
+    fetchDashboard();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="text-gray-500 text-lg">
+        Loading dashboard...
+      </div>
+    );
+  }
 
   const statsData = [
     {
@@ -99,14 +111,6 @@ const Dashboard = () => {
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="text-gray-500 text-lg">
-        Loading dashboard...
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
 
@@ -117,20 +121,14 @@ const Dashboard = () => {
         </h1>
 
         <p className="mt-3 text-blue-100">
-          Manage your products, users, orders and analytics from one place.
+          Manage products, users, orders, and analytics from one place.
         </p>
       </div>
 
-      {/* Statistics */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {statsData.map((item, index) => (
-          <StatCard
-            key={index}
-            title={item.title}
-            value={item.value}
-            icon={item.icon}
-            color={item.color}
-          />
+          <StatCard key={index} {...item} />
         ))}
       </div>
 
@@ -170,21 +168,22 @@ const Dashboard = () => {
             Recent Orders
           </h2>
 
-          <div className="space-y-4">
-            <div className="flex justify-between border-b pb-3">
-              <span>#ORD001</span>
-              <span className="text-green-600">Delivered</span>
-            </div>
-
-            <div className="flex justify-between border-b pb-3">
-              <span>#ORD002</span>
-              <span className="text-yellow-500">Processing</span>
-            </div>
-
-            <div className="flex justify-between border-b pb-3">
-              <span>#ORD003</span>
-              <span className="text-red-500">Cancelled</span>
-            </div>
+          <div className="space-y-3">
+            {recentOrders.length > 0 ? (
+              recentOrders.map((order, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between border-b pb-3"
+                >
+                  <span>#{order._id?.slice(-5) || "ORD"}</span>
+                  <span className="text-gray-500">
+                    {order.status || "Pending"}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400">No recent orders</p>
+            )}
           </div>
         </div>
 
@@ -194,26 +193,28 @@ const Dashboard = () => {
             Latest Users
           </h2>
 
-          <div className="space-y-4">
-            <div className="flex justify-between border-b pb-3">
-              <span>Rahul Sharma</span>
-              <span className="text-gray-500">Today</span>
-            </div>
-
-            <div className="flex justify-between border-b pb-3">
-              <span>Priya Singh</span>
-              <span className="text-gray-500">Yesterday</span>
-            </div>
-
-            <div className="flex justify-between border-b pb-3">
-              <span>Amit Kumar</span>
-              <span className="text-gray-500">2 days ago</span>
-            </div>
+          <div className="space-y-3">
+            {latestUsers.length > 0 ? (
+              latestUsers.map((user, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between border-b pb-3"
+                >
+                  <span>{user.name || "User"}</span>
+                  <span className="text-gray-500">
+                    {user.createdAt
+                      ? new Date(user.createdAt).toDateString()
+                      : ""}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400">No users found</p>
+            )}
           </div>
         </div>
 
       </div>
-
     </div>
   );
 };

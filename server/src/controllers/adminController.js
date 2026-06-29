@@ -1,8 +1,9 @@
 const User = require("../model/UserModel");
 const Order = require("../model/OrderModel");
+const Product = require("../model/ProductModel");
 
 // ==============================
-// Total Users
+// TOTAL USERS
 // ==============================
 const getTotalUsers = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ const getTotalUsers = async (req, res) => {
 };
 
 // ==============================
-// Total Orders
+// TOTAL ORDERS
 // ==============================
 const getTotalOrders = async (req, res) => {
   try {
@@ -40,7 +41,7 @@ const getTotalOrders = async (req, res) => {
 };
 
 // ==============================
-// Total Revenue
+// TOTAL REVENUE
 // ==============================
 const getTotalRevenue = async (req, res) => {
   try {
@@ -69,7 +70,7 @@ const getTotalRevenue = async (req, res) => {
 };
 
 // ==============================
-// Make User Admin / Change Role
+// MAKE ADMIN / CHANGE ROLE
 // ==============================
 const makeAdmin = async (req, res) => {
   try {
@@ -93,7 +94,6 @@ const makeAdmin = async (req, res) => {
     }
 
     user.role = role;
-
     await user.save();
 
     res.status(200).json({
@@ -109,9 +109,58 @@ const makeAdmin = async (req, res) => {
   }
 };
 
+// ==============================
+// 🚀 ADMIN DASHBOARD (CLEAN API)
+// ==============================
+const getDashboardStats = async (req, res) => {
+  try {
+    const [users, orders, products] = await Promise.all([
+      User.countDocuments(),
+      Order.countDocuments(),
+      Product.countDocuments(),
+    ]);
+
+    const revenueResult = await Order.aggregate([
+      {
+        $match: { paymentStatus: "paid" },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
+
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const latestUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.status(200).json({
+      success: true,
+      products,
+      users,
+      orders,
+      revenue: revenueResult[0]?.totalRevenue || 0,
+      recentOrders,
+      latestUsers,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getTotalUsers,
   getTotalOrders,
   getTotalRevenue,
   makeAdmin,
+  getDashboardStats,
 };
