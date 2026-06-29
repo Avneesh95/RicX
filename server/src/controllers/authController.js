@@ -190,6 +190,32 @@ const loginUser = async (req, res) => {
   }
 };
 
+
+
+
+// GET ALL USERS (ADMIN ONLY)
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+
+    console.log("👤 USERS FETCHED:", users.length);
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.log("❌ USERS ERROR:", error.message);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
 /* =========================
    FORGOT PASSWORD
 ========================= */
@@ -278,4 +304,5 @@ module.exports = {
   loginUser,
   forgetPassword,
   resetPassword,
+  getAllUsers
 };

@@ -7,11 +7,11 @@ const Product = require("../model/ProductModel");
 // ==============================
 const getTotalUsers = async (req, res) => {
   try {
-    const count = await User.countDocuments();
+    const totalUsers = await User.countDocuments();
 
     res.status(200).json({
       success: true,
-      totalUsers: count,
+      totalUsers,
     });
   } catch (error) {
     res.status(500).json({
@@ -26,11 +26,11 @@ const getTotalUsers = async (req, res) => {
 // ==============================
 const getTotalOrders = async (req, res) => {
   try {
-    const count = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments();
 
     res.status(200).json({
       success: true,
-      totalOrders: count,
+      totalOrders,
     });
   } catch (error) {
     res.status(500).json({
@@ -59,7 +59,7 @@ const getTotalRevenue = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      revenue: result.length > 0 ? result[0].totalRevenue : 0,
+      revenue: result[0]?.totalRevenue || 0,
     });
   } catch (error) {
     res.status(500).json({
@@ -70,7 +70,7 @@ const getTotalRevenue = async (req, res) => {
 };
 
 // ==============================
-// MAKE ADMIN / CHANGE ROLE
+// CHANGE USER ROLE (ADMIN)
 // ==============================
 const makeAdmin = async (req, res) => {
   try {
@@ -110,7 +110,7 @@ const makeAdmin = async (req, res) => {
 };
 
 // ==============================
-// 🚀 ADMIN DASHBOARD (CLEAN API)
+// 🚀 ADMIN DASHBOARD (MAIN API)
 // ==============================
 const getDashboardStats = async (req, res) => {
   try {

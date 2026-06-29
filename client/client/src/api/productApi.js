@@ -1,15 +1,16 @@
 import api from "./axios";
 
-// GET ALL PRODUCTS
-export const getProducts = async () => {
-  return await api.get("/products");
+// GET ALL
+export const getProducts = () => {
+  return api.get("/products");
 };
 
-// DELETE PRODUCT (ADMIN)
-export const deleteProduct = async (id, token) => {
-  return await api.delete(`/products/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// DELETE PRODUCT
+export const deleteProduct = (id) => {
+  return api.delete(`/products/${id}`);
+};
+
+// UPDATE PRODUCT
+export const updateProduct = (id, data) => {
+  return api.put(`/products/${id}`, data);
 };

@@ -137,21 +137,24 @@ const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user", "name email")
-      .populate("orderItems.product")
       .sort({ createdAt: -1 });
+
+    console.log("📦 ORDERS FROM DB:", orders.length);
 
     res.status(200).json({
       success: true,
-      count: orders.length,
       orders,
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
+
 
 const updateOrderStatus = async (req, res) => {
   try {

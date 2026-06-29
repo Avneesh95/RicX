@@ -4,6 +4,7 @@ const router = express.Router();
 
 const {
   registerUser,
+  getAllUsers,
   verifyRegisterOtp,
   loginUser,
   forgetPassword,
