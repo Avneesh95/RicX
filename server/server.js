@@ -1,48 +1,68 @@
 const express = require("express");
 const dotenv = require("dotenv");
-dotenv.config();
 const cors = require("cors");
+
+dotenv.config();
+
 const app = express();
+
+// =========================
+// DATABASE
+// =========================
 const connectDB = require("./src/config/db.js");
-const authRoutes = require("./src/routes/authRoutes");
-const orderRoutes = require("./src/routes/orderRoutes.js");
-const productRoutes = require("./src/routes/productRoutes");
-const paymentRoutes = require("./src/routes/paymentRoutes.js");
-const adminRoutes = require("./src/routes/adminRoutes");
-
-const invoiceRoutes = require("./src/routes/invoiceRoutes");
-const cartRoutes = require("./src/routes/cartRoutes");
-
-const port = 4000;
-
-app.use(cors({
-  origin: "http://localhost:5173", // Vite default
-  credentials: true,
-}));
-
-app.use(express.json());
-
-app.use("/api/auth", authRoutes);
-
-app.use("/api/products", productRoutes);
-
-app.use("/api/cart", cartRoutes);
-
-app.use("/api/order", orderRoutes);
-
-app.use("/api/payment", paymentRoutes);
-
-app.use("/api/admin", adminRoutes);
-
-app.use("/api/invoice", invoiceRoutes);
-
-
-app.get("/",(req,res)=>{
-  res.send("working");
-})
-
 connectDB();
 
-app.listen(port, () => {
-  console.log(`server is listening on ${port}`);
+// =========================
+// MIDDLEWARE (ORDER MATTERS)
+// =========================
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// =========================
+// ROUTES
+// =========================
+app.use("/api/auth", require("./src/routes/authRoutes"));
+app.use("/api/products", require("./src/routes/productRoutes"));
+app.use("/api/cart", require("./src/routes/cartRoutes"));
+app.use("/api/order", require("./src/routes/orderRoutes"));
+app.use("/api/payment", require("./src/routes/paymentRoutes"));
+app.use("/api/admin", require("./src/routes/adminRoutes"));
+app.use("/api/invoice", require("./src/routes/invoiceRoutes"));
+
+// =========================
+// HEALTH CHECK
+// =========================
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "RicX API running successfully 🚀",
+  });
+});
+
+// =========================
+// GLOBAL ERROR HANDLER (SAFE)
+// =========================
+app.use((err, req, res, next) => {
+  console.error("🔥 SERVER ERROR:", err);
+
+  res.status(500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+// =========================
+// START SERVER
+// =========================
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });

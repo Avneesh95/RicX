@@ -1,69 +1,98 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
+const orderSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-  orderItems: [
-    {
-      product: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+    orderItems: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+        },
+        quantity: Number,
+        price: Number,
       },
-      quantity: Number,
-      price: Number,
-    },
-  ],
+    ],
 
-  shippingAddress: {
-    fullName: {
-      type: String,
+    shippingAddress: {
+      fullName: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+      },
+      address: {
+        type: String,
+        required: true,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      pincode: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        default: "India",
+      },
+    },
+
+    totalAmount: {
+      type: Number,
       required: true,
     },
-    phone: {
+
+    status: {
       type: String,
-      required: true,
+      enum: [
+        "pending",
+        "confirmed",
+        "shipped",
+        "delivered",
+        "cancelled",
+      ],
+      default: "pending",
     },
-    address: {
+
+    paymentStatus: {
       type: String,
-      required: true,
+      enum: [
+        "pending",
+        "paid",
+        "failed",
+      ],
+      default: "pending",
     },
-    city: {
+
+    paymentMethod: {
       type: String,
-      required: true,
+      default: "Razorpay",
     },
-    state: {
-      type: String,
-      required: true,
-    },
-    pincode: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      default: "India",
-    },
+
+    razorpayOrderId: String,
+
+    razorpayPaymentId: String,
+
+    razorpaySignature: String,
   },
-
-  totalAmount: Number,
-
-  status: {
-    type: String,
-    default: "pending",
-  },
-
-  paymentStatus: {
-    type: String,
-    default: "unpaid",
-  },
-},
-{
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports =
-  mongoose.models.Order || mongoose.model("Order", orderSchema);
+  mongoose.models.Order ||
+  mongoose.model("Order", orderSchema);

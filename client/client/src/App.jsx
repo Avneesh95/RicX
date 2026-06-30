@@ -4,6 +4,11 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import OTP from "./pages/Otp";
 import Home from "./pages/Home";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import ProductDetails from "./pages/ProductDetails";
+import Orders from "./pages/Orders";
+import OrderSuccess from "./pages/OrderSuccess";
 
 // Admin
 import AdminRoutes from "./admin/adminRoutes";
@@ -17,9 +22,26 @@ function App() {
         {/* ======================
             USER ROUTES
         ====================== */}
+
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
 
+        {/* Product */}
+        <Route path="/product/:id" element={<ProductDetails />} />
+
+        {/* Cart */}
+        <Route path="/cart" element={<Cart />} />
+
+        {/* Checkout */}
+        <Route path="/checkout" element={<Checkout />} />
+
+        {/* Orders */}
+        <Route path="/orders" element={<Orders />} />
+
+        {/* Payment Success */}
+        <Route path="/success" element={<OrderSuccess />} />
+
+        {/* Auth */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTP />} />
@@ -27,6 +49,7 @@ function App() {
         {/* ======================
             ADMIN ROUTES
         ====================== */}
+
         <Route
           path="/admin/*"
           element={
@@ -37,7 +60,19 @@ function App() {
         />
 
         {/* 404 */}
-        <Route path="*" element={<h1>404 Page Not Found</h1>} />
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="text-center">
+                <h1 className="text-6xl font-bold text-red-500">404</h1>
+                <p className="text-gray-600 mt-4">
+                  Page Not Found
+                </p>
+              </div>
+            </div>
+          }
+        />
 
       </Routes>
     </BrowserRouter>

@@ -68,7 +68,7 @@ const placeOrder = async (req, res) => {
 
       totalAmount,
 
-      paymentStatus: "unpaid",
+      paymentStatus: "pending",
       status: "pending",
     });
 
