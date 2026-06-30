@@ -13,21 +13,27 @@ export default function AdminOrders() {
   const token = localStorage.getItem("token");
 
   // ================= FETCH =================
-  const fetchOrders = async () => {
-    try {
-      console.log("📦 Fetching orders...");
+const fetchOrders = async () => {
+  try {
+    console.log("📦 Fetching orders...");
 
-      const res = await getAllOrders();
+    const res = await getAllOrders();
 
-      console.log("📦 ORDERS RESPONSE:", res.data);
+    console.log("📦 RAW RESPONSE:", res);
 
-      setOrders(res.data.orders || res.data || []);
-    } catch (err) {
-      console.error("❌ ORDER FETCH ERROR:", err.response?.data || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const list =
+      res?.orders ||
+      res?.data?.orders ||
+      res?.data ||
+      [];
+
+    setOrders(Array.isArray(list) ? list : []);
+  } catch (err) {
+    console.error("❌ ORDER FETCH ERROR:", err.response?.data || err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchOrders();
@@ -35,22 +41,29 @@ export default function AdminOrders() {
 
   // ================= STATUS UPDATE =================
   const handleStatusChange = async (id, status) => {
+    if (!token) {
+      alert("Session expired. Please log in again.");
+      return;
+    }
+
     try {
       setUpdatingId(id);
-
-      console.log("🔄 Updating order:", id, status);
+      console.log("🔄 Updating order status:", id, status);
 
       const res = await updateOrderStatus(id, status, token);
-
       console.log("✅ UPDATED:", res.data);
 
+      // ✅ FIX 2: Correctly update 'status' locally matching backend schema
       setOrders((prev) =>
         prev.map((o) =>
-          o._id === id ? { ...o, orderStatus: status } : o
+          o._id === id 
+            ? { ...o, status, ...(res.data?.order || {}) } 
+            : o
         )
       );
     } catch (err) {
       console.error("❌ UPDATE ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Failed to update status.");
     } finally {
       setUpdatingId(null);
     }
@@ -58,85 +71,109 @@ export default function AdminOrders() {
 
   // ================= DELETE ORDER =================
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to permanently delete order #${id.slice(-6)}?`
+    );
+    if (!confirmDelete) return;
+
     try {
       console.log("🗑 Deleting order:", id);
-
       await deleteOrder(id, token);
 
       setOrders((prev) => prev.filter((o) => o._id !== id));
     } catch (err) {
       console.error("❌ DELETE ERROR:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Failed to delete order. Double-check your DELETE /api/order/:id route.");
     }
   };
 
+  // ================= HELPER BADGE STYLES =================
+  const getPaymentBadge = (status) => {
+    const base = "px-2 py-0.5 rounded text-xs font-semibold uppercase ";
+    if (status?.toLowerCase() === "completed" || status?.toLowerCase() === "paid") {
+      return base + "bg-green-100 text-green-800";
+    }
+    return base + "bg-yellow-100 text-yellow-800";
+  };
+
   if (loading) {
-    return <div className="p-6 text-gray-500">Loading orders...</div>;
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500 font-medium">
+        Loading system orders...
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-
-      <h1 className="text-2xl font-bold mb-6">
-        Orders Management
-      </h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Monitor transactions, track fulfillment updates, and update order statuses.
+        </p>
+      </div>
 
       <div className="space-y-4">
-
-        {orders.map((order) => (
-          <div
-            key={order._id}
-            className="border rounded-lg p-4 flex justify-between items-center"
-          >
-
-            {/* LEFT */}
-            <div>
-              <p className="font-semibold">
-                Order #{order._id.slice(-6)}
-              </p>
-
-              <p className="text-sm text-gray-500">
-                ₹{order.totalAmount}
-              </p>
-
-              <p className="text-sm">
-                Payment:{" "}
-                <span className="font-medium">
-                  {order.paymentStatus}
-                </span>
-              </p>
-            </div>
-
-            {/* MIDDLE */}
-            <div>
-              <select
-                value={order.orderStatus}
-                onChange={(e) =>
-                  handleStatusChange(order._id, e.target.value)
-                }
-                disabled={updatingId === order._id}
-                className="border p-2 rounded"
-              >
-                <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-
-            {/* RIGHT */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDelete(order._id)}
-                className="bg-red-600 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-
+        {orders.length === 0 ? (
+          <div className="text-center py-12 text-gray-400 border-2 border-dashed rounded-xl">
+            No customer orders recorded yet.
           </div>
-        ))}
+        ) : (
+          orders.map((order) => (
+            <div
+              key={order._id}
+              className="bg-white border border-gray-200 hover:border-gray-300 shadow-sm rounded-xl p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition duration-150"
+            >
+              {/* LEFT INFO BLOCK */}
+              <div className="space-y-1">
+                <p className="font-bold text-gray-800 text-lg">
+                  Order #{order._id.slice(-6)}
+                </p>
+                <p className="text-base font-semibold text-gray-900">
+                  ₹{order.totalAmount}
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-sm text-gray-500">Payment:</span>
+                  <span className={getPaymentBadge(order.paymentStatus)}>
+                    {order.paymentStatus || "Pending"}
+                  </span>
+                </div>
+              </div>
 
+              {/* CONTROLS */}
+              <div className="flex flex-wrap items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                <div>
+                  <select
+                    // ✅ FIX 1: Read 'status' instead of 'orderStatus'
+                    value={order.status || "pending"}
+                    onChange={(e) =>
+                      handleStatusChange(order._id, e.target.value)
+                    }
+                    disabled={updatingId === order._id}
+                    className="border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2.5 rounded-lg text-sm bg-gray-50 font-medium text-gray-700 transition cursor-pointer disabled:bg-gray-200 disabled:cursor-not-allowed"
+                  >
+                    <option value="pending">⏳ Pending</option>
+                    {/* Aligned with backend enum string "confirmed" */}
+                    <option value="confirmed">🤝 Confirmed</option>
+                    <option value="shipped">📦 Shipped</option>
+                    <option value="delivered">✅ Delivered</option>
+                    <option value="cancelled">❌ Cancelled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => handleDelete(order._id)}
+                    className="bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-4 py-2.5 rounded-lg transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

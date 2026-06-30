@@ -1,6 +1,7 @@
 const Order = require("../model/OrderModel");
 const Cart = require("../model/CartModel");
 
+// ================= PLACE ORDER =================
 const placeOrder = async (req, res) => {
   try {
     const {
@@ -13,7 +14,6 @@ const placeOrder = async (req, res) => {
       country,
     } = req.body;
 
-   
     if (
       !fullName ||
       !phone ||
@@ -88,9 +88,12 @@ const placeOrder = async (req, res) => {
   }
 };
 
+// ================= USER ORDERS =================
 const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id })
+    const orders = await Order.find({
+      user: req.user._id,
+    })
       .populate("orderItems.product")
       .sort({ createdAt: -1 });
 
@@ -107,7 +110,7 @@ const getMyOrders = async (req, res) => {
   }
 };
 
-
+// ================= SINGLE ORDER =================
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
@@ -133,21 +136,19 @@ const getOrderById = async (req, res) => {
   }
 };
 
+// ================= ADMIN ALL ORDERS =================
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user", "name email")
+      .populate("orderItems.product", "name image price")
       .sort({ createdAt: -1 });
-
-    console.log("📦 ORDERS FROM DB:", orders.length);
 
     res.status(200).json({
       success: true,
       orders,
     });
   } catch (error) {
-    console.error(error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -155,10 +156,25 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-
+// ================= UPDATE STATUS =================
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
+
+    const allowedStatus = [
+      "pending",
+      "confirmed",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order status",
+      });
+    }
 
     const order = await Order.findById(req.params.id);
 
@@ -170,6 +186,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     order.status = status;
+
     await order.save();
 
     res.status(200).json({
@@ -185,7 +202,31 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+// ================= DELETE ORDER =================
+const deleteOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
 
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 module.exports = {
   placeOrder,
@@ -193,4 +234,5 @@ module.exports = {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder,
 };

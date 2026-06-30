@@ -1,10 +1,11 @@
-import { Route, Routes } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import AdminLayout from "./AdminLayout";
+
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import AddProduct from "./pages/AddProduct";
-import Users from "./pages/Users";
+import AdminUsers from "../pages/AdminUser";
 
 const AdminRoutes = () => {
   return (
@@ -13,7 +14,7 @@ const AdminRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="products" element={<Products />} />
         <Route path="add-product" element={<AddProduct />} />
-        <Route path="users" element={<Users />} />
+        <Route path="users" element={<AdminUsers />} />
       </Route>
     </Routes>
   );

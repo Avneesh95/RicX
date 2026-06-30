@@ -1,0 +1,275 @@
+import { useEffect, useState } from "react";
+import {
+  getUsers,
+  updateUserRole,
+  deleteUser,
+} from "../api/userApi";
+
+export default function AdminUsers() {
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
+
+  // ===========================
+  // FETCH USERS
+  // ===========================
+  const fetchUsers = async () => {
+    try {
+      const res = await getUsers();
+
+
+console.log("FULL RESPONSE:", res);
+console.log("DATA:", res.data);
+console.log("USERS:", res.data.users);
+
+
+
+      const list = res.data.users || [];
+
+      setUsers(list);
+      setFilteredUsers(list);
+    } catch (err) {
+      console.error(
+        err.response?.data || err.message
+      );
+      alert("Failed to fetch users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // ===========================
+  // SEARCH
+  // ===========================
+  useEffect(() => {
+    const keyword = search.toLowerCase();
+
+    setFilteredUsers(
+      users.filter(
+        (u) =>
+          u.name.toLowerCase().includes(keyword) ||
+          u.email.toLowerCase().includes(keyword)
+      )
+    );
+  }, [search, users]);
+
+  // ===========================
+  // UPDATE ROLE
+  // ===========================
+  const handleRoleChange = async (id, role) => {
+    try {
+      setUpdatingId(id);
+
+      await updateUserRole(id, role);
+
+      setUsers((prev) =>
+        prev.map((user) =>
+          user._id === id
+            ? { ...user, role }
+            : user
+        )
+      );
+
+      alert("Role updated successfully");
+    } catch (err) {
+      console.error(
+        err.response?.data || err.message
+      );
+      alert("Failed to update role");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // ===========================
+  // DELETE USER
+  // ===========================
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Delete this user?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteUser(id);
+
+      setUsers((prev) =>
+        prev.filter((u) => u._id !== id)
+      );
+
+      alert("User deleted");
+    } catch (err) {
+      console.error(
+        err.response?.data || err.message
+      );
+      alert("Failed to delete user");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500 text-lg">
+        Loading Users...
+      </div>
+    );
+  }
+    return (
+    <div className="max-w-7xl mx-auto p-6">
+
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            User Management
+          </h1>
+
+          <p className="text-gray-500 mt-1">
+            Manage all registered users.
+          </p>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Search user..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border rounded-lg px-4 py-2 w-full md:w-72 focus:ring-2 focus:ring-indigo-500 outline-none"
+        />
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow overflow-x-auto">
+
+        <table className="min-w-full">
+
+          <thead className="bg-gray-100">
+
+            <tr>
+
+              <th className="text-left px-6 py-4">
+                Name
+              </th>
+
+              <th className="text-left px-6 py-4">
+                Email
+              </th>
+
+              <th className="text-left px-6 py-4">
+                Role
+              </th>
+
+              <th className="text-left px-6 py-4">
+                Joined
+              </th>
+
+              <th className="text-center px-6 py-4">
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {filteredUsers.length === 0 ? (
+
+              <tr>
+
+                <td
+                  colSpan="5"
+                  className="text-center py-8 text-gray-500"
+                >
+                  No users found.
+                </td>
+
+              </tr>
+
+            ) : (
+
+              filteredUsers.map((user) => (
+
+                <tr
+                  key={user._id}
+                  className="border-t hover:bg-gray-50"
+                >
+
+                  <td className="px-6 py-4 font-medium">
+                    {user.name}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {user.email}
+                  </td>
+
+                  <td className="px-6 py-4">
+
+                    <select
+                      value={user.role}
+                      disabled={updatingId === user._id}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          user._id,
+                          e.target.value
+                        )
+                      }
+                      className="border rounded px-3 py-1"
+                    >
+                      <option value="user">
+                        User
+                      </option>
+
+                      <option value="admin">
+                        Admin
+                      </option>
+
+                    </select>
+
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {new Date(
+                      user.createdAt
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td className="px-6 py-4 text-center">
+
+                    <button
+                      onClick={() =>
+                        handleDelete(user._id)
+                      }
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                    >
+                      Delete
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              ))
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="mt-6 text-sm text-gray-500">
+        Total Users: {filteredUsers.length}
+      </div>
+
+    </div>
+  );
+}

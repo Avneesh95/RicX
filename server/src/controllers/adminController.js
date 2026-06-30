@@ -22,6 +22,56 @@ const getTotalUsers = async (req, res) => {
 };
 
 // ==============================
+// GET ALL USERS
+// ==============================
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ==============================
+// DELETE USER
+// ==============================
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ==============================
 // TOTAL ORDERS
 // ==============================
 const getTotalOrders = async (req, res) => {
@@ -47,12 +97,16 @@ const getTotalRevenue = async (req, res) => {
   try {
     const result = await Order.aggregate([
       {
-        $match: { paymentStatus: "paid" },
+        $match: {
+          paymentStatus: "paid",
+        },
       },
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: {
+            $sum: "$totalAmount",
+          },
         },
       },
     ]);
@@ -70,7 +124,7 @@ const getTotalRevenue = async (req, res) => {
 };
 
 // ==============================
-// CHANGE USER ROLE (ADMIN)
+// CHANGE USER ROLE
 // ==============================
 const makeAdmin = async (req, res) => {
   try {
@@ -110,7 +164,7 @@ const makeAdmin = async (req, res) => {
 };
 
 // ==============================
-// 🚀 ADMIN DASHBOARD (MAIN API)
+// ADMIN DASHBOARD
 // ==============================
 const getDashboardStats = async (req, res) => {
   try {
@@ -122,21 +176,27 @@ const getDashboardStats = async (req, res) => {
 
     const revenueResult = await Order.aggregate([
       {
-        $match: { paymentStatus: "paid" },
+        $match: {
+          paymentStatus: "paid",
+        },
       },
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: "$totalAmount" },
+          totalRevenue: {
+            $sum: "$totalAmount",
+          },
         },
       },
     ]);
 
     const recentOrders = await Order.find()
+      .populate("user", "name email")
       .sort({ createdAt: -1 })
       .limit(5);
 
     const latestUsers = await User.find()
+      .select("-password")
       .sort({ createdAt: -1 })
       .limit(5);
 
@@ -159,6 +219,8 @@ const getDashboardStats = async (req, res) => {
 
 module.exports = {
   getTotalUsers,
+  getAllUsers,
+  deleteUser,
   getTotalOrders,
   getTotalRevenue,
   makeAdmin,

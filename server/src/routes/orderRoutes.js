@@ -7,6 +7,7 @@ const {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder,
 } = require("../controllers/orderController");
 
 const {
@@ -14,17 +15,20 @@ const {
   isAdmin,
 } = require("../middleware/authMiddleware");
 
-
+// ================= USER =================
 router.post("/place", isAuthenticated, placeOrder);
 
 router.get("/my", isAuthenticated, getMyOrders);
 
-
 router.get("/:id", isAuthenticated, getOrderById);
 
+// ================= ADMIN =================
 
-router.get("/", isAuthenticated, getAllOrders);
+
+router.get("/", isAuthenticated, isAdmin, getAllOrders);
 
 router.put("/:id", isAuthenticated, isAdmin, updateOrderStatus);
+
+router.delete("/:id", isAuthenticated, isAdmin, deleteOrder);
 
 module.exports = router;
