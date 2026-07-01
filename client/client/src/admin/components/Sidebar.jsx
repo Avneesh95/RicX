@@ -6,6 +6,7 @@ import {
   Users,
   Home,
   LogOut,
+  BarChart3,
   ShoppingBag,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -26,6 +28,12 @@ const Sidebar = () => {
       name: "Dashboard",
       icon: <LayoutDashboard size={20} />,
       path: "/admin",
+    },
+    {
+      name: "Analytics",
+      icon: <BarChart3 size={20} />,
+      path: "/admin/analytics",
+      show: role === "admin",
     },
     {
       name: "Products",
@@ -46,21 +54,17 @@ const Sidebar = () => {
       name: "Users",
       icon: <Users size={20} />,
       path: "/admin/users",
+      show: role === "admin",
     },
   ];
 
   return (
     <aside className="w-64 min-h-screen bg-slate-900 text-white flex flex-col shadow-2xl">
 
-      {/* ================= Logo ================= */}
+      {/* Logo */}
       <div className="px-6 py-7 border-b border-slate-700">
-        <h1 className="text-4xl font-extrabold text-blue-500 tracking-wide">
-          RicX
-        </h1>
-
-        <p className="text-sm text-slate-400 mt-2">
-          Admin Dashboard
-        </p>
+        <h1 className="text-4xl font-extrabold text-blue-500">RicX</h1>
+        <p className="text-sm text-slate-400 mt-2">Admin Dashboard</p>
 
         {user && (
           <div className="mt-5 bg-slate-800 rounded-xl p-3">
@@ -70,30 +74,30 @@ const Sidebar = () => {
         )}
       </div>
 
-      {/* ================= Navigation ================= */}
+      {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
-
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            end={item.path === "/admin"}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`
-            }
-          >
-            {item.icon}
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-
+        {menuItems
+          .filter((item) => item.show !== false)
+          .map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              end={item.path === "/admin"}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                  isActive
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                }`
+              }
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
       </nav>
 
-      {/* ================= Bottom ================= */}
+      {/* Bottom */}
       <div className="border-t border-slate-700 p-4 space-y-3">
 
         <NavLink
@@ -113,16 +117,11 @@ const Sidebar = () => {
         </button>
 
         <div className="text-center pt-2">
-          <p className="text-xs text-slate-500">
-            © 2026 RicX Store
-          </p>
-          <p className="text-[11px] text-slate-600 mt-1">
-            Version 1.0
-          </p>
+          <p className="text-xs text-slate-500">© 2026 RicX Store</p>
+          <p className="text-[11px] text-slate-600 mt-1">Version 1.0</p>
         </div>
 
       </div>
-
     </aside>
   );
 };

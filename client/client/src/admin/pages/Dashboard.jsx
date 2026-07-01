@@ -112,23 +112,20 @@ const Dashboard = () => {
     {
       title: "Analytics",
       icon: <BarChart3 size={30} />,
-      link: "/admin",
+      link: "/admin/analytics", // ✅ CORRECT
       color: "bg-pink-600",
     },
   ];
 
   return (
     <div className="space-y-8">
-
       {/* Hero */}
       <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 p-8 text-white shadow-xl">
-        <h1 className="text-4xl font-bold">
-          Welcome Back 👋
-        </h1>
+        <h1 className="text-4xl font-bold">Welcome Back 👋</h1>
 
         <p className="mt-3 text-blue-100 text-lg">
-          Manage your products, users, orders and monitor your store
-          performance from one powerful dashboard.
+          Manage your products, users, orders and monitor your store performance
+          from one powerful dashboard.
         </p>
       </div>
 
@@ -141,15 +138,10 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div>
-
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">
-            Quick Actions
-          </h2>
+          <h2 className="text-2xl font-bold text-slate-800">Quick Actions</h2>
 
-          <span className="text-gray-500">
-            Everything at one place
-          </span>
+          <span className="text-gray-500">Everything at one place</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -165,30 +157,22 @@ const Dashboard = () => {
                 {item.icon}
               </div>
 
-              <h3 className="text-lg font-bold text-slate-800">
-                {item.title}
-              </h3>
+              <h3 className="text-lg font-bold text-slate-800">{item.title}</h3>
 
-              <p className="text-gray-500 mt-2 text-sm">
-                Click to manage
-              </p>
+              <p className="text-gray-500 mt-2 text-sm">Click to manage</p>
             </Link>
           ))}
         </div>
-
       </div>
 
       {/* Bottom Section */}
       <div className="grid lg:grid-cols-2 gap-8"></div>
-            {/* Bottom Section */}
+      {/* Bottom Section */}
       <div className="grid lg:grid-cols-2 gap-8">
-
         {/* Recent Orders */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold">
-              Recent Orders
-            </h2>
+            <h2 className="text-xl font-bold">Recent Orders</h2>
 
             <Link
               to="/admin/orders"
@@ -206,9 +190,7 @@ const Dashboard = () => {
                   className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
                 >
                   <div>
-                    <p className="font-semibold">
-                      #{order._id.slice(-6)}
-                    </p>
+                    <p className="font-semibold">#{order._id.slice(-6)}</p>
 
                     <p className="text-sm text-gray-500">
                       {order.shippingAddress?.fullName}
@@ -225,10 +207,10 @@ const Dashboard = () => {
                         order.status === "delivered"
                           ? "bg-green-100 text-green-700"
                           : order.status === "confirmed"
-                          ? "bg-blue-100 text-blue-700"
-                          : order.status === "cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
+                            ? "bg-blue-100 text-blue-700"
+                            : order.status === "cancelled"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
                       {order.status}
@@ -247,9 +229,7 @@ const Dashboard = () => {
         {/* Latest Users */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold">
-              Latest Users
-            </h2>
+            <h2 className="text-xl font-bold">Latest Users</h2>
 
             <Link
               to="/admin/users"
@@ -267,13 +247,9 @@ const Dashboard = () => {
                   className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
                 >
                   <div>
-                    <p className="font-semibold">
-                      {user.name}
-                    </p>
+                    <p className="font-semibold">{user.name}</p>
 
-                    <p className="text-sm text-gray-500">
-                      {user.email}
-                    </p>
+                    <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
 
                   <span
@@ -294,7 +270,6 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

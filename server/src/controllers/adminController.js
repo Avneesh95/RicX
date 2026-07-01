@@ -21,6 +21,132 @@ const getTotalUsers = async (req, res) => {
   }
 };
 
+
+// ==============================
+// ANALYTICS
+// ==============================
+const getAnalytics = async (req, res) => {
+  try {
+    // Basic Counts
+    const [totalUsers, totalProducts, totalOrders] =
+      await Promise.all([
+        User.countDocuments(),
+        Product.countDocuments(),
+        Order.countDocuments(),
+      ]);
+
+    // Revenue
+    const revenueResult = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: {
+            $sum: "$totalAmount",
+          },
+        },
+      },
+    ]);
+
+    const totalRevenue =
+      revenueResult[0]?.totalRevenue || 0;
+
+    // Monthly Revenue
+    const monthlyRevenue = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt",
+            },
+          },
+          revenue: {
+            $sum: "$totalAmount",
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.month": 1,
+        },
+      },
+    ]);
+
+    // Monthly Orders
+    const monthlyOrders = await Order.aggregate([
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt",
+            },
+          },
+          orders: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.month": 1,
+        },
+      },
+    ]);
+
+    // Category Distribution
+    const categoryStats = await Product.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          value: {
+            $sum: 1,
+          },
+        },
+      },
+    ]);
+
+    // Low Stock
+    const lowStock = await Product.find({
+      stock: {
+        $lte: 5,
+      },
+    }).select("name stock category");
+
+    res.status(200).json({
+      success: true,
+
+      stats: {
+        totalRevenue,
+        totalOrders,
+        totalUsers,
+        totalProducts,
+      },
+
+      monthlyRevenue,
+
+      monthlyOrders,
+
+      categoryStats,
+
+      lowStock,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ==============================
 // GET ALL USERS
 // ==============================
@@ -225,4 +351,5 @@ module.exports = {
   getTotalRevenue,
   makeAdmin,
   getDashboardStats,
+  getAnalytics,
 };

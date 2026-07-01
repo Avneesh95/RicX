@@ -65,14 +65,72 @@ const createProduct = async (req, res) => {
 // =========================
 // Get All Products
 // =========================
+
 const products = async (req, res) => {
   try {
-    const product = await Product.find();
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 8;
+
+    const keyword = req.query.search || "";
+    const category = req.query.category || "";
+    const sort = req.query.sort || "newest";
+
+    const query = {};
+
+    // Search
+    if (keyword) {
+      query.name = {
+        $regex: keyword,
+        $options: "i",
+      };
+    }
+
+    // Category
+    if (category && category !== "All") {
+      query.category = category;
+    }
+
+    // Sorting
+    let sortOption = {};
+
+    switch (sort) {
+      case "price_asc":
+        sortOption = { price: 1 };
+        break;
+
+      case "price_desc":
+        sortOption = { price: -1 };
+        break;
+
+      case "name_asc":
+        sortOption = { name: 1 };
+        break;
+
+      case "name_desc":
+        sortOption = { name: -1 };
+        break;
+
+      case "oldest":
+        sortOption = { createdAt: 1 };
+        break;
+
+      default:
+        sortOption = { createdAt: -1 };
+    }
+
+    const totalProducts = await Product.countDocuments(query);
+
+    const product = await Product.find(query)
+      .sort(sortOption)
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
-      count: product.length,
       product,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      totalProducts,
     });
   } catch (error) {
     res.status(500).json({

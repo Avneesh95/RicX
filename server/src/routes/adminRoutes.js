@@ -9,6 +9,7 @@ const {
   getDashboardStats,
   getAllUsers,
   deleteUser,
+  getAnalytics,
 } = require("../controllers/adminController");
 
 const {
@@ -24,6 +25,13 @@ router.get(
   isAuthenticated,
   isAdmin,
   getDashboardStats
+);
+
+router.get(
+  "/analytics",
+  isAuthenticated,
+  isAdmin,
+  getAnalytics
 );
 
 // ==============================
