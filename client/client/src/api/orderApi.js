@@ -1,10 +1,10 @@
 import api from "./axios";
 
 // ==========================
-// GET ALL ORDERS (ADMIN)
+// PLACE ORDER
 // ==========================
-export const getAllOrders = async () => {
-  return await api.get("/order");
+export const placeOrder = async (orderData) => {
+  return await api.post("/order/place", orderData);
 };
 
 // ==========================
@@ -22,7 +22,21 @@ export const getOrderById = async (id) => {
 };
 
 // ==========================
-// UPDATE ORDER STATUS
+// CANCEL ORDER
+// ==========================
+export const cancelOrder = async (id) => {
+  return await api.put(`/order/cancel/${id}`);
+};
+
+// ==========================
+// GET ALL ORDERS (ADMIN)
+// ==========================
+export const getAllOrders = async () => {
+  return await api.get("/order");
+};
+
+// ==========================
+// UPDATE ORDER STATUS (ADMIN)
 // ==========================
 export const updateOrderStatus = async (id, status) => {
   return await api.put(`/order/${id}`, {
@@ -31,7 +45,7 @@ export const updateOrderStatus = async (id, status) => {
 };
 
 // ==========================
-// DELETE ORDER
+// DELETE ORDER (ADMIN)
 // ==========================
 export const deleteOrder = async (id) => {
   return await api.delete(`/order/${id}`);

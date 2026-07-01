@@ -9,6 +9,7 @@ import Checkout from "./pages/Checkout";
 import ProductDetails from "./pages/ProductDetails";
 import Orders from "./pages/Orders";
 import OrderSuccess from "./pages/OrderSuccess";
+import Profile from "./pages/Profile";
 
 // Admin
 import AdminRoutes from "./admin/adminRoutes";
@@ -18,10 +19,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
         {/* ======================
             USER ROUTES
         ====================== */}
 
+        {/* Home */}
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
 
@@ -37,10 +40,13 @@ function App() {
         {/* Orders */}
         <Route path="/orders" element={<Orders />} />
 
+        {/* User Profile */}
+        <Route path="/profile" element={<Profile />} />
+
         {/* Payment Success */}
         <Route path="/success" element={<OrderSuccess />} />
 
-        {/* Auth */}
+        {/* Authentication */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/otp" element={<OTP />} />
@@ -48,6 +54,7 @@ function App() {
         {/* ======================
             ADMIN ROUTES
         ====================== */}
+
         <Route
           path="/admin/*"
           element={
@@ -57,7 +64,10 @@ function App() {
           }
         />
 
-        {/* 404 */}
+        {/* ======================
+            404 PAGE
+        ====================== */}
+
         <Route
           path="*"
           element={
@@ -73,6 +83,7 @@ function App() {
             </div>
           }
         />
+
       </Routes>
     </BrowserRouter>
   );

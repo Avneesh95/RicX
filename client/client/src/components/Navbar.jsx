@@ -1,5 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, LogOut } from "lucide-react";
+import {
+  ShoppingCart,
+  LogOut,
+  User,
+  Package,
+  LayoutDashboard,
+} from "lucide-react";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -16,74 +22,84 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md">
-
+    <nav className="sticky top-0 z-50 bg-white shadow-md border-b">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
 
         {/* Logo */}
-
         <Link
           to="/"
-          className="text-2xl font-bold text-indigo-600"
+          className="text-3xl font-extrabold text-indigo-600"
         >
           RicX Store
         </Link>
 
-        {/* Menu */}
-
+        {/* Right Side */}
         <div className="flex items-center gap-6">
 
           <Link
             to="/"
-            className="hover:text-indigo-600"
+            className="font-medium hover:text-indigo-600 transition"
           >
             Home
           </Link>
 
           {token && (
-            <Link
-              to="/cart"
-              className="relative flex items-center gap-2 hover:text-indigo-600"
-            >
-              <ShoppingCart size={22} />
-              Cart
-            </Link>
-          )}
-
-          {user?.role === "admin" && (
-            <Link
-              to="/admin"
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-            >
-              Admin Dashboard
-            </Link>
-          )}
-
-          {!token ? (
             <>
+              {/* Cart */}
               <Link
-                to="/login"
-                className="hover:text-indigo-600"
+                to="/cart"
+                className="flex items-center gap-2 hover:text-indigo-600 transition"
               >
-                Login
+                <ShoppingCart size={21} />
+                Cart
               </Link>
 
+              {/* Orders */}
               <Link
-                to="/register"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+                to="/orders"
+                className="flex items-center gap-2 hover:text-indigo-600 transition"
               >
-                Register
+                <Package size={20} />
+                Orders
               </Link>
-            </>
-          ) : (
-            <>
-              <span className="font-semibold">
-                Hi, {user?.name}
-              </span>
 
+              {/* Profile */}
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 hover:text-indigo-600 transition"
+              >
+                {user?.avatar?.url ? (
+                  <img
+                    src={user.avatar.url}
+                    alt="avatar"
+                    className="w-9 h-9 rounded-full object-cover border"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                    <User size={18} />
+                  </div>
+                )}
+
+                <span className="font-semibold">
+                  {user?.name}
+                </span>
+              </Link>
+
+              {/* Admin Dashboard */}
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                >
+                  <LayoutDashboard size={18} />
+                  Admin
+                </Link>
+              )}
+
+              {/* Logout */}
               <button
                 onClick={logout}
-                className="flex items-center gap-2 bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300"
+                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg transition"
               >
                 <LogOut size={18} />
                 Logout
@@ -91,10 +107,26 @@ const Navbar = () => {
             </>
           )}
 
+          {!token && (
+            <>
+              <Link
+                to="/login"
+                className="font-medium hover:text-indigo-600 transition"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition"
+              >
+                Register
+              </Link>
+            </>
+          )}
+
         </div>
-
       </div>
-
     </nav>
   );
 };

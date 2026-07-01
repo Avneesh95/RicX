@@ -192,6 +192,92 @@ const loginUser = async (req, res) => {
 
 
 
+// =========================
+// GET MY PROFILE
+// =========================
+const getMyProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// =========================
+// UPDATE PROFILE
+// =========================
+const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.name = req.body.name || user.name;
+    user.phone = req.body.phone || user.phone;
+
+    if (req.file) {
+      if (user.avatar?.public_id) {
+        await cloudinary.uploader.destroy(user.avatar.public_id);
+      }
+
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "RicX Users",
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+
+        stream.end(req.file.buffer);
+      });
+
+      user.avatar = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 
 // GET ALL USERS (ADMIN ONLY)
 const getAllUsers = async (req, res) => {
@@ -304,5 +390,10 @@ module.exports = {
   loginUser,
   forgetPassword,
   resetPassword,
-  getAllUsers
+  getAllUsers,
+
+
+  getMyProfile,
+  updateProfile
+
 };

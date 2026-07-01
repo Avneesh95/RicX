@@ -62,38 +62,53 @@ const createProduct = async (req, res) => {
   }
 };
 
+
+
 // =========================
 // Get All Products
 // =========================
-
 const products = async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 8;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 8, 1);
 
-    const keyword = req.query.search || "";
+    const search = req.query.search?.trim() || "";
     const category = req.query.category || "";
     const sort = req.query.sort || "newest";
 
     const query = {};
 
-    // Search
-    if (keyword) {
-      query.name = {
-        $regex: keyword,
-        $options: "i",
-      };
+    // Search by name OR category
+    if (search) {
+      query.$or = [
+        {
+          name: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+        {
+          category: {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      ];
     }
 
-    // Category
+    // Category Filter
     if (category && category !== "All") {
       query.category = category;
     }
 
     // Sorting
-    let sortOption = {};
+    let sortOption = { createdAt: -1 };
 
     switch (sort) {
+      case "oldest":
+        sortOption = { createdAt: 1 };
+        break;
+
       case "price_asc":
         sortOption = { price: 1 };
         break;
@@ -108,10 +123,6 @@ const products = async (req, res) => {
 
       case "name_desc":
         sortOption = { name: -1 };
-        break;
-
-      case "oldest":
-        sortOption = { createdAt: 1 };
         break;
 
       default:
@@ -133,13 +144,14 @@ const products = async (req, res) => {
       totalProducts,
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 // =========================
 // Get Product By ID
 // =========================

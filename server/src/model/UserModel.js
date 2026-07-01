@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+
     email: {
       type: String,
       required: true,
@@ -14,13 +15,31 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: true,
     },
+
+    phone: {
+      type: String,
+      default: "",
+    },
+
+    avatar: {
+      public_id: {
+        type: String,
+        default: "",
+      },
+      url: {
+        type: String,
+        default: "",
+      },
+    },
+
     role: {
       type: String,
-      enum: ["user", "admin"], 
+      enum: ["user", "admin"],
       default: "user",
     },
   },

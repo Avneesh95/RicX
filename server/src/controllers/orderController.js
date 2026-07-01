@@ -202,6 +202,75 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+
+// ================= CANCEL ORDER =================
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      "orderItems.product"
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Only owner can cancel
+    if (order.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Already cancelled
+    if (order.status === "cancelled") {
+      return res.status(400).json({
+        success: false,
+        message: "Order already cancelled",
+      });
+    }
+
+    // Cannot cancel after shipping
+    if (
+      order.status === "shipped" ||
+      order.status === "delivered"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Order cannot be cancelled after shipping",
+      });
+    }
+
+    // Restore stock
+    for (const item of order.orderItems) {
+      const product = await Product.findById(item.product._id);
+
+      if (product) {
+        product.stock += item.quantity;
+        await product.save();
+      }
+    }
+
+    order.status = "cancelled";
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // ================= DELETE ORDER =================
 const deleteOrder = async (req, res) => {
   try {
@@ -234,5 +303,6 @@ module.exports = {
   getOrderById,
   getAllOrders,
   updateOrderStatus,
+  cancelOrder,
   deleteOrder,
 };
