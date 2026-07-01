@@ -24,35 +24,35 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await api.get("/admin/dashboard");
-
-        const data = res.data;
-
-        setStats({
-          products: data.products || 0,
-          users: data.users || 0,
-          orders: data.orders || 0,
-          revenue: data.revenue || 0,
-        });
-
-        setRecentOrders(data.recentOrders || []);
-        setLatestUsers(data.latestUsers || []);
-      } catch (err) {
-        console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDashboard();
   }, []);
 
+  const fetchDashboard = async () => {
+    try {
+      const res = await api.get("/admin/dashboard");
+
+      setStats({
+        products: res.data.products || 0,
+        users: res.data.users || 0,
+        orders: res.data.orders || 0,
+        revenue: res.data.revenue || 0,
+      });
+
+      setRecentOrders(res.data.recentOrders || []);
+      setLatestUsers(res.data.latestUsers || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="text-gray-500 text-lg">
-        Loading dashboard...
+      <div className="h-[80vh] flex justify-center items-center">
+        <div className="text-xl font-semibold text-gray-500">
+          Loading Dashboard...
+        </div>
       </div>
     );
   }
@@ -98,7 +98,13 @@ const Dashboard = () => {
       color: "bg-green-600",
     },
     {
-      title: "Users",
+      title: "Manage Orders",
+      icon: <ShoppingBag size={30} />,
+      link: "/admin/orders",
+      color: "bg-orange-500",
+    },
+    {
+      title: "Manage Users",
       icon: <Users size={30} />,
       link: "/admin/users",
       color: "bg-purple-600",
@@ -106,7 +112,7 @@ const Dashboard = () => {
     {
       title: "Analytics",
       icon: <BarChart3 size={30} />,
-      link: "/admin/analytics",
+      link: "/admin",
       color: "bg-pink-600",
     },
   ];
@@ -114,14 +120,15 @@ const Dashboard = () => {
   return (
     <div className="space-y-8">
 
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 rounded-3xl text-white p-8 shadow-lg">
+      {/* Hero */}
+      <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 p-8 text-white shadow-xl">
         <h1 className="text-4xl font-bold">
           Welcome Back 👋
         </h1>
 
-        <p className="mt-3 text-blue-100">
-          Manage products, users, orders, and analytics from one place.
+        <p className="mt-3 text-blue-100 text-lg">
+          Manage your products, users, orders and monitor your store
+          performance from one powerful dashboard.
         </p>
       </div>
 
@@ -134,84 +141,158 @@ const Dashboard = () => {
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-2xl font-bold mb-6">
-          Quick Actions
-        </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">
+            Quick Actions
+          </h2>
+
+          <span className="text-gray-500">
+            Everything at one place
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           {actions.map((item, index) => (
             <Link
               key={index}
               to={item.link}
-              className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 p-6"
             >
               <div
-                className={`${item.color} w-16 h-16 rounded-xl text-white flex items-center justify-center mb-5`}
+                className={`${item.color} w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-5 group-hover:scale-110 transition`}
               >
                 {item.icon}
               </div>
 
-              <h3 className="text-xl font-semibold">
+              <h3 className="text-lg font-bold text-slate-800">
                 {item.title}
               </h3>
+
+              <p className="text-gray-500 mt-2 text-sm">
+                Click to manage
+              </p>
             </Link>
           ))}
         </div>
+
       </div>
 
       {/* Bottom Section */}
+      <div className="grid lg:grid-cols-2 gap-8"></div>
+            {/* Bottom Section */}
       <div className="grid lg:grid-cols-2 gap-8">
 
         {/* Recent Orders */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-5">
-            Recent Orders
-          </h2>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold">
+              Recent Orders
+            </h2>
 
-          <div className="space-y-3">
-            {recentOrders.length > 0 ? (
-              recentOrders.map((order, idx) => (
-                <div
-                  key={idx}
-                  className="flex justify-between border-b pb-3"
-                >
-                  <span>#{order._id?.slice(-5) || "ORD"}</span>
-                  <span className="text-gray-500">
-                    {order.status || "Pending"}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400">No recent orders</p>
-            )}
+            <Link
+              to="/admin/orders"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View All →
+            </Link>
           </div>
+
+          {recentOrders.length > 0 ? (
+            <div className="space-y-4">
+              {recentOrders.map((order) => (
+                <div
+                  key={order._id}
+                  className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
+                >
+                  <div>
+                    <p className="font-semibold">
+                      #{order._id.slice(-6)}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {order.shippingAddress?.fullName}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="font-bold text-green-600">
+                      ₹{order.totalAmount}
+                    </p>
+
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        order.status === "delivered"
+                          ? "bg-green-100 text-green-700"
+                          : order.status === "confirmed"
+                          ? "bg-blue-100 text-blue-700"
+                          : order.status === "cancelled"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-gray-400">
+              No recent orders found.
+            </div>
+          )}
         </div>
 
         {/* Latest Users */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-5">
-            Latest Users
-          </h2>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-xl font-bold">
+              Latest Users
+            </h2>
 
-          <div className="space-y-3">
-            {latestUsers.length > 0 ? (
-              latestUsers.map((user, idx) => (
+            <Link
+              to="/admin/users"
+              className="text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View All →
+            </Link>
+          </div>
+
+          {latestUsers.length > 0 ? (
+            <div className="space-y-4">
+              {latestUsers.map((user) => (
                 <div
-                  key={idx}
-                  className="flex justify-between border-b pb-3"
+                  key={user._id}
+                  className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
                 >
-                  <span>{user.name || "User"}</span>
-                  <span className="text-gray-500">
-                    {user.createdAt
-                      ? new Date(user.createdAt).toDateString()
-                      : ""}
+                  <div>
+                    <p className="font-semibold">
+                      {user.name}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {user.email}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      user.role === "admin"
+                        ? "bg-purple-100 text-purple-700"
+                        : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {user.role}
                   </span>
                 </div>
-              ))
-            ) : (
-              <p className="text-gray-400">No users found</p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10 text-gray-400">
+              No users found.
+            </div>
+          )}
         </div>
 
       </div>

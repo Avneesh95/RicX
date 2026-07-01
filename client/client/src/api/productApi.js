@@ -1,56 +1,25 @@
 import api from "./axios";
 
-// =========================
-// GET ALL PRODUCTS
-// =========================
+// Get all products
 export const getProducts = () => {
   return api.get("/products");
 };
 
-// =========================
-// GET SINGLE PRODUCT
-// =========================
+// Get single product
 export const getProductById = (id) => {
   return api.get(`/products/${id}`);
 };
 
-// =========================
-// CREATE PRODUCT
-// =========================
-export const createProduct = (formData) => {
-  const token = localStorage.getItem("token");
-
-  return api.post("/products/add", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "multipart/form-data",
-    },
-  });
-};
-
-// =========================
-// UPDATE PRODUCT
-// =========================
+// Update product
 export const updateProduct = (id, formData) => {
-  const token = localStorage.getItem("token");
-
   return api.put(`/products/${id}`, formData, {
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "multipart/form-data",
     },
   });
 };
 
-// =========================
-// DELETE PRODUCT
-// =========================
+// Delete product
 export const deleteProduct = (id) => {
-  const token = localStorage.getItem("token");
-
-  return api.delete(`/products/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return api.delete(`/products/${id}`);
 };

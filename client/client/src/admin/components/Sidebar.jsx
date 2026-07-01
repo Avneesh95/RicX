@@ -6,12 +6,13 @@ import {
   Users,
   Home,
   LogOut,
+  ShoppingBag,
 } from "lucide-react";
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,87 +26,103 @@ const Sidebar = () => {
       name: "Dashboard",
       icon: <LayoutDashboard size={20} />,
       path: "/admin",
-      show: role === "admin",
     },
     {
       name: "Products",
       icon: <Package size={20} />,
       path: "/admin/products",
-      show: role === "admin",
     },
     {
       name: "Add Product",
       icon: <PlusCircle size={20} />,
       path: "/admin/add-product",
-      show: role === "admin",
+    },
+    {
+      name: "Manage Orders",
+      icon: <ShoppingBag size={20} />,
+      path: "/admin/orders",
     },
     {
       name: "Users",
       icon: <Users size={20} />,
       path: "/admin/users",
-      show: role === "admin",
-    },
-    {
-      name: "Home",
-      icon: <Home size={20} />,
-      path: "/",
-      show: true,
     },
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white min-h-screen shadow-lg relative">
-      
-      {/* Logo */}
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-3xl font-bold text-blue-400">
+    <aside className="w-64 min-h-screen bg-slate-900 text-white flex flex-col shadow-2xl">
+
+      {/* ================= Logo ================= */}
+      <div className="px-6 py-7 border-b border-slate-700">
+        <h1 className="text-4xl font-extrabold text-blue-500 tracking-wide">
           RicX
         </h1>
-        <p className="text-gray-400 text-sm mt-1">
-          {role === "admin" ? "Admin Panel" : "User Panel"}
+
+        <p className="text-sm text-slate-400 mt-2">
+          Admin Dashboard
         </p>
+
+        {user && (
+          <div className="mt-5 bg-slate-800 rounded-xl p-3">
+            <p className="font-semibold">{user.name}</p>
+            <p className="text-xs text-slate-400">{user.email}</p>
+          </div>
+        )}
       </div>
 
-      {/* Navigation */}
-      <nav className="mt-6 px-3">
-        {menuItems
-          .filter((item) => item.show)
-          .map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              end={item.path === "/admin"}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl mb-2 transition-all duration-200 ${
-                  isActive
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-slate-800 hover:text-white"
-                }`
-              }
-            >
-              {item.icon}
-              <span>{item.name}</span>
-            </NavLink>
-          ))}
+      {/* ================= Navigation ================= */}
+      <nav className="flex-1 px-4 py-6 space-y-2">
+
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            end={item.path === "/admin"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              }`
+            }
+          >
+            {item.icon}
+            <span>{item.name}</span>
+          </NavLink>
+        ))}
+
       </nav>
 
-      {/* Logout */}
-      <div className="absolute bottom-16 left-0 w-64 px-6">
+      {/* ================= Bottom ================= */}
+      <div className="border-t border-slate-700 p-4 space-y-3">
+
+        <NavLink
+          to="/"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition"
+        >
+          <Home size={20} />
+          Back to Store
+        </NavLink>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 bg-red-600 hover:bg-red-700 rounded-xl transition"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold"
         >
           <LogOut size={20} />
           Logout
         </button>
+
+        <div className="text-center pt-2">
+          <p className="text-xs text-slate-500">
+            © 2026 RicX Store
+          </p>
+          <p className="text-[11px] text-slate-600 mt-1">
+            Version 1.0
+          </p>
+        </div>
+
       </div>
 
-      {/* Footer */}
-      <div className="absolute bottom-5 left-0 w-64 px-6">
-        <p className="text-gray-500 text-sm text-center">
-          © 2026 RicX Store
-        </p>
-      </div>
     </aside>
   );
 };

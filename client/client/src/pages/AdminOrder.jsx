@@ -3,7 +3,7 @@ import {
   getAllOrders,
   updateOrderStatus,
   deleteOrder,
-} from "../../api/orderApi";
+} from "../api/orderApi";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
