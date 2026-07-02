@@ -8,7 +8,7 @@ const {
   getAllOrders,
   updateOrderStatus,
   deleteOrder,
-  cancelOrder, // NEW
+  cancelOrder,
 } = require("../controllers/orderController");
 
 const {
@@ -16,48 +16,33 @@ const {
   isAdmin,
 } = require("../middleware/authMiddleware");
 
-// ================= USER =================
+// ======================
+// USER ROUTES
+// ======================
 
 // Place Order
 router.post("/place", isAuthenticated, placeOrder);
 
-// My Orders
+// Get My Orders
 router.get("/my", isAuthenticated, getMyOrders);
 
-// Order Details
+// Cancel Order
+router.put("/cancel/:id", isAuthenticated, cancelOrder);
+
+// Get Single Order Details
 router.get("/:id", isAuthenticated, getOrderById);
 
-// Cancel Order
-router.put(
-  "/cancel/:id",
-  isAuthenticated,
-  cancelOrder
-);
+// ======================
+// ADMIN ROUTES
+// ======================
 
-// ================= ADMIN =================
+// Get All Orders
+router.get("/", isAuthenticated, isAdmin, getAllOrders);
 
-// All Orders
-router.get(
-  "/",
-  isAuthenticated,
-  isAdmin,
-  getAllOrders
-);
-
-// Update Status
-router.put(
-  "/:id",
-  isAuthenticated,
-  isAdmin,
-  updateOrderStatus
-);
+// Update Order Status
+router.put("/:id", isAuthenticated, isAdmin, updateOrderStatus);
 
 // Delete Order
-router.delete(
-  "/:id",
-  isAuthenticated,
-  isAdmin,
-  deleteOrder
-);
+router.delete("/:id", isAuthenticated, isAdmin, deleteOrder);
 
 module.exports = router;

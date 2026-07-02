@@ -1,5 +1,6 @@
 const Order = require("../model/OrderModel");
 const Cart = require("../model/CartModel");
+const Product = require("../model/ProductModel");
 
 // ================= PLACE ORDER =================
 const placeOrder = async (req, res) => {
@@ -53,7 +54,6 @@ const placeOrder = async (req, res) => {
 
     const order = await Order.create({
       user: req.user._id,
-
       orderItems,
 
       shippingAddress: {
@@ -80,6 +80,7 @@ const placeOrder = async (req, res) => {
       message: "Order placed successfully",
       order,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -88,13 +89,16 @@ const placeOrder = async (req, res) => {
   }
 };
 
-// ================= USER ORDERS =================
+// ================= MY ORDERS =================
 const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({
       user: req.user._id,
     })
-      .populate("orderItems.product")
+      .populate({
+        path: "orderItems.product",
+        model: "Product",
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -102,6 +106,7 @@ const getMyOrders = async (req, res) => {
       count: orders.length,
       orders,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -114,8 +119,11 @@ const getMyOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
-      .populate("orderItems.product")
-      .populate("user", "name email");
+      .populate("user", "name email")
+      .populate({
+        path: "orderItems.product",
+        model: "Product",
+      });
 
     if (!order) {
       return res.status(404).json({
@@ -124,10 +132,22 @@ const getOrderById = async (req, res) => {
       });
     }
 
+    // User can only view own order
+    if (
+      order.user._id.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
     res.status(200).json({
       success: true,
       order,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -141,13 +161,17 @@ const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("user", "name email")
-      .populate("orderItems.product", "name image price")
+      .populate({
+        path: "orderItems.product",
+        model: "Product",
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       orders,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -194,6 +218,7 @@ const updateOrderStatus = async (req, res) => {
       message: "Order status updated",
       order,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -202,13 +227,11 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-
 // ================= CANCEL ORDER =================
 const cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate(
-      "orderItems.product"
-    );
+    const order = await Order.findById(req.params.id)
+      .populate("orderItems.product");
 
     if (!order) {
       return res.status(404).json({
@@ -217,7 +240,6 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    // Only owner can cancel
     if (order.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
@@ -225,7 +247,6 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    // Already cancelled
     if (order.status === "cancelled") {
       return res.status(400).json({
         success: false,
@@ -233,24 +254,21 @@ const cancelOrder = async (req, res) => {
       });
     }
 
-    // Cannot cancel after shipping
     if (
       order.status === "shipped" ||
       order.status === "delivered"
     ) {
       return res.status(400).json({
         success: false,
-        message: "Order cannot be cancelled after shipping",
+        message: "Order cannot be cancelled now",
       });
     }
 
-    // Restore stock
+    // Restore Stock
     for (const item of order.orderItems) {
-      const product = await Product.findById(item.product._id);
-
-      if (product) {
-        product.stock += item.quantity;
-        await product.save();
+      if (item.product) {
+        item.product.stock += item.quantity;
+        await item.product.save();
       }
     }
 
@@ -263,6 +281,7 @@ const cancelOrder = async (req, res) => {
       message: "Order cancelled successfully",
       order,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -289,6 +308,7 @@ const deleteOrder = async (req, res) => {
       success: true,
       message: "Order deleted successfully",
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,

@@ -10,6 +10,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Orders from "./pages/Orders";
 import OrderSuccess from "./pages/OrderSuccess";
 import Profile from "./pages/Profile";
+import OrderDetails from "./pages/OrderDetails";
 
 // Admin
 import AdminRoutes from "./admin/adminRoutes";
@@ -18,8 +19,8 @@ import AdminProtectedRoute from "./admin/AdminProtectedRoutes";
 function App() {
   return (
     <BrowserRouter>
+      {/* 💡 If you have a global Header/Navbar component, place it here right above <Routes> */}
       <Routes>
-
         {/* ======================
             USER ROUTES
         ====================== */}
@@ -31,14 +32,13 @@ function App() {
         {/* Product */}
         <Route path="/product/:id" element={<ProductDetails />} />
 
-        {/* Cart */}
+        {/* Cart & Checkout */}
         <Route path="/cart" element={<Cart />} />
-
-        {/* Checkout */}
         <Route path="/checkout" element={<Checkout />} />
 
         {/* Orders */}
         <Route path="/orders" element={<Orders />} />
+        <Route path="/order/:id" element={<OrderDetails />} />
 
         {/* User Profile */}
         <Route path="/profile" element={<Profile />} />
@@ -73,17 +73,12 @@ function App() {
           element={
             <div className="min-h-screen flex items-center justify-center">
               <div className="text-center">
-                <h1 className="text-6xl font-bold text-red-500">
-                  404
-                </h1>
-                <p className="text-gray-600 mt-4">
-                  Page Not Found
-                </p>
+                <h1 className="text-6xl font-bold text-red-500">404</h1>
+                <p className="text-gray-600 mt-4">Page Not Found</p>
               </div>
             </div>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );

@@ -50,3 +50,12 @@ export const updateOrderStatus = async (id, status) => {
 export const deleteOrder = async (id) => {
   return await api.delete(`/order/${id}`);
 };
+
+
+// PDF invoice generation
+
+export const downloadInvoice = async (id) => {
+  return await api.get(`/invoice/${id}`, {
+    responseType: "blob",
+  });
+};
