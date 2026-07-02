@@ -16,71 +16,111 @@ import OrderDetails from "./pages/OrderDetails";
 import AdminRoutes from "./admin/adminRoutes";
 import AdminProtectedRoute from "./admin/AdminProtectedRoutes";
 
+// Theme
+import { ThemeProvider } from "./context/ThemeContext";
+
 function App() {
   return (
-    <BrowserRouter>
-      {/* 💡 If you have a global Header/Navbar component, place it here right above <Routes> */}
-      <Routes>
-        {/* ======================
-            USER ROUTES
-        ====================== */}
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
 
-        {/* Home */}
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
+          {/* ======================
+              USER ROUTES
+          ====================== */}
 
-        {/* Product */}
-        <Route path="/product/:id" element={<ProductDetails />} />
+          {/* Home */}
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
 
-        {/* Cart & Checkout */}
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
+          {/* Product */}
+          <Route
+            path="/product/:id"
+            element={<ProductDetails />}
+          />
 
-        {/* Orders */}
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/order/:id" element={<OrderDetails />} />
+          {/* Cart */}
+          <Route path="/cart" element={<Cart />} />
 
-        {/* User Profile */}
-        <Route path="/profile" element={<Profile />} />
+          {/* Checkout */}
+          <Route
+            path="/checkout"
+            element={<Checkout />}
+          />
 
-        {/* Payment Success */}
-        <Route path="/success" element={<OrderSuccess />} />
+          {/* Orders */}
+          <Route path="/orders" element={<Orders />} />
 
-        {/* Authentication */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/otp" element={<OTP />} />
+          <Route
+            path="/order/:id"
+            element={<OrderDetails />}
+          />
 
-        {/* ======================
-            ADMIN ROUTES
-        ====================== */}
+          {/* Profile */}
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
 
-        <Route
-          path="/admin/*"
-          element={
-            <AdminProtectedRoute>
-              <AdminRoutes />
-            </AdminProtectedRoute>
-          }
-        />
+          {/* Success */}
+          <Route
+            path="/success"
+            element={<OrderSuccess />}
+          />
 
-        {/* ======================
-            404 PAGE
-        ====================== */}
+          {/* Authentication */}
+          <Route
+            path="/register"
+            element={<Register />}
+          />
 
-        <Route
-          path="*"
-          element={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="text-center">
-                <h1 className="text-6xl font-bold text-red-500">404</h1>
-                <p className="text-gray-600 mt-4">Page Not Found</p>
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/otp"
+            element={<OTP />}
+          />
+
+          {/* ======================
+              ADMIN ROUTES
+          ====================== */}
+
+          <Route
+            path="/admin/*"
+            element={
+              <AdminProtectedRoute>
+                <AdminRoutes />
+              </AdminProtectedRoute>
+            }
+          />
+
+          {/* ======================
+              404 PAGE
+          ====================== */}
+
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 transition-colors duration-300">
+                <div className="text-center">
+                  <h1 className="text-7xl font-bold text-red-500">
+                    404
+                  </h1>
+
+                  <p className="text-gray-600 dark:text-gray-300 mt-4 text-lg">
+                    Page Not Found
+                  </p>
+                </div>
               </div>
-            </div>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+            }
+          />
+
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

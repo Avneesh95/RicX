@@ -5,10 +5,17 @@ import {
   User,
   Package,
   LayoutDashboard,
+  Sparkles,
+  Moon,
+  Sun,
 } from "lucide-react";
+
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
+
+  const { darkMode, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
@@ -22,74 +29,123 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow-md border-b">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 shadow-lg transition-all duration-300">
+
+      <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
 
         {/* Logo */}
+
         <Link
           to="/"
-          className="text-3xl font-extrabold text-indigo-600"
+          className="group flex items-center gap-3"
         >
-          RicX Store
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg group-hover:rotate-12 group-hover:scale-110 transition duration-500">
+
+            <Sparkles className="text-white" size={24} />
+
+          </div>
+
+          <div>
+
+            <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+              RicX
+            </h1>
+
+            <p className="text-xs text-gray-500 dark:text-gray-400 tracking-widest">
+              PREMIUM STORE
+            </p>
+
+          </div>
         </Link>
 
-        {/* Right Side */}
-        <div className="flex items-center gap-6">
+        {/* Center Menu */}
+
+        <div className="hidden lg:flex items-center gap-10">
 
           <Link
             to="/"
-            className="font-medium hover:text-indigo-600 transition"
+            className="relative font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
           >
             Home
+
+            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+
           </Link>
 
           {token && (
             <>
-              {/* Cart */}
               <Link
                 to="/cart"
-                className="flex items-center gap-2 hover:text-indigo-600 transition"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
               >
-                <ShoppingCart size={21} />
+                <ShoppingCart size={20} />
                 Cart
+
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
 
-              {/* Orders */}
               <Link
                 to="/orders"
-                className="flex items-center gap-2 hover:text-indigo-600 transition"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
               >
                 <Package size={20} />
                 Orders
-              </Link>
 
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+              </Link>
+            </>
+          )}
+
+        </div>
+
+        {/* Right Section */}
+
+        <div className="flex items-center gap-4">
+
+                    {/* Dark Mode */}
+
+          <button
+            onClick={toggleTheme}
+            className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 hover:rotate-180 transition-all duration-500 flex items-center justify-center shadow-md"
+          >
+            {darkMode ? (
+              <Sun className="text-yellow-400" size={20} />
+            ) : (
+              <Moon className="text-gray-700" size={20} />
+            )}
+          </button>
+
+          {token ? (
+            <>
               {/* Profile */}
+
               <Link
                 to="/profile"
-                className="flex items-center gap-2 hover:text-indigo-600 transition"
+                className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 px-3 py-2 rounded-full transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105"
               >
                 {user?.avatar?.url ? (
                   <img
                     src={user.avatar.url}
                     alt="avatar"
-                    className="w-9 h-9 rounded-full object-cover border"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white"
                   />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white">
                     <User size={18} />
                   </div>
                 )}
 
-                <span className="font-semibold">
+                <span className="font-semibold hidden md:block">
                   {user?.name}
                 </span>
               </Link>
 
-              {/* Admin Dashboard */}
+              {/* Admin */}
+
               {user?.role === "admin" && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
                 >
                   <LayoutDashboard size={18} />
                   Admin
@@ -97,34 +153,32 @@ const Navbar = () => {
               )}
 
               {/* Logout */}
+
               <button
                 onClick={logout}
-                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg transition"
+                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-red-600 hover:text-white transition-all duration-300 shadow-md hover:scale-105"
               >
                 <LogOut size={18} />
                 Logout
               </button>
             </>
-          )}
-
-          {!token && (
+          ) : (
             <>
               <Link
                 to="/login"
-                className="font-medium hover:text-indigo-600 transition"
+                className="font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition"
               >
                 Login
               </Link>
 
               <Link
                 to="/register"
-                className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
               >
                 Register
               </Link>
             </>
           )}
-
         </div>
       </div>
     </nav>
