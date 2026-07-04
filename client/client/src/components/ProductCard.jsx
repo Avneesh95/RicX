@@ -1,19 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import {
-  Eye,
-  ShoppingCart,
-  Zap,
-  Heart,
-  Star,
-} from "lucide-react";
-
 import { addToCart } from "../api/cartApi";
+import { motion } from "framer-motion";
 
 const ProductCard = ({ product }) => {
-  const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (!product) return null;
 
@@ -27,156 +19,115 @@ const ProductCard = ({ product }) => {
 
     try {
       setLoading(true);
-
-      const { data } = await addToCart(
-        product._id,
-        1
-      );
-
-      alert(data.message);
+      await addToCart(product._id, 1);
+      alert("Added to cart");
     } catch (err) {
-      alert(
-        err.response?.data?.message ||
-          "Failed to add to cart"
-      );
+      alert(err.response?.data?.message || "Failed to add to cart");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBuyNow = () => {
-    navigate("/checkout", {
-      state: {
-        buyNow: true,
-        product,
-        quantity: 1,
-      },
-    });
+  const handleBuyNow = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Please login first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await addToCart(product._id, 1);
+
+      navigate("/checkout");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed");
+    } finally {
+      setLoading(false);
+    }
   };
     return (
-    <div className="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 border">
-
-      {/* Image */}
+    <motion.div
+      whileHover={{ y: -10, scale: 1.02 }}
+      transition={{ duration: 0.3 }}
+      className="group relative bg-white dark:bg-gray-900 rounded-3xl shadow-lg border border-gray-200 dark:border-gray-800 overflow-hidden"
+    >
+      {/* Image Section */}
       <div className="relative overflow-hidden">
-
         <img
           src={product.image?.url}
           alt={product.name}
-          className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+          className="h-56 w-full object-cover group-hover:scale-110 transition duration-500"
         />
 
-        {/* Sale Badge */}
-        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-          SALE
-        </div>
+        {/* Glow overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition" />
 
-        {/* Wishlist */}
-        <button
-          className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-red-500 hover:text-white transition"
+        {/* Stock badge */}
+        <div
+          className={`absolute top-3 left-3 px-3 py-1 text-xs font-bold rounded-full ${
+            product.stock > 0
+              ? "bg-green-500 text-white"
+              : "bg-red-500 text-white"
+          }`}
         >
-          <Heart size={18} />
-        </button>
-
-        {/* Stock Badge */}
-        <div className="absolute bottom-4 left-4">
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
-              product.stock > 0
-                ? "bg-green-600"
-                : "bg-red-600"
-            }`}
-          >
-            {product.stock > 0
-              ? "In Stock"
-              : "Out of Stock"}
-          </span>
+          {product.stock > 0 ? "In Stock" : "Out of Stock"}
         </div>
-
       </div>
+            <div className="p-5">
 
-      {/* Content */}
-      <div className="p-5">
-
-        <h2 className="text-xl font-bold line-clamp-1">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-500 transition">
           {product.name}
         </h2>
 
-        <div className="flex items-center mt-2 gap-1">
-
-          <Star
-            size={16}
-            fill="gold"
-            color="gold"
-          />
-
-          <span className="font-semibold">
-            4.8
-          </span>
-
-          <span className="text-gray-400 text-sm">
-            (128 Reviews)
-          </span>
-
-        </div>
-
-        <p className="text-gray-500 mt-3 h-12 overflow-hidden text-sm">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
           {product.description}
         </p>
 
-        <div className="flex justify-between items-center mt-5">
-
-          <div>
-
-            <p className="text-3xl font-bold text-indigo-600">
-              ₹{product.price}
-            </p>
-
-            <p className="text-sm text-gray-400 line-through">
-              ₹{Math.floor(product.price * 1.25)}
-            </p>
-
-          </div>
-
-          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold text-sm">
-            20% OFF
+        {/* Price */}
+        <div className="flex justify-between items-center mt-4">
+          <span className="text-2xl font-bold text-indigo-600">
+            ₹{product.price}
           </span>
 
+          <span className="text-xs text-gray-500">
+            {product.category}
+          </span>
         </div>
 
         {/* Buttons */}
-        <div className="grid grid-cols-3 gap-2 mt-6">
-
-          <Link
-            to={`/product/${product._id}`}
-            className="flex justify-center items-center gap-1 border border-indigo-600 text-indigo-600 py-2 rounded-xl hover:bg-indigo-600 hover:text-white transition"
-          >
-            <Eye size={16} />
-            View
-          </Link>
-
+        <div className="mt-5 flex gap-3">
+          
           <button
             onClick={handleAddToCart}
             disabled={loading || product.stock === 0}
-            className="flex justify-center items-center gap-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl transition disabled:bg-gray-400"
+            className="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition"
           >
-            <ShoppingCart size={16} />
-            {loading ? "..." : "Cart"}
+            {loading ? "Adding..." : "Add to Cart"}
           </button>
 
           <button
             onClick={handleBuyNow}
             disabled={product.stock === 0}
-            className="flex justify-center items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl transition disabled:bg-gray-400"
+            className="flex-1 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 hover:scale-105 text-white font-semibold transition"
           >
-            <Zap size={16} />
-            Buy
+            Buy Now
           </button>
 
         </div>
 
-      </div>
+        {/* View Button */}
+        <Link
+          to={`/product/${product._id}`}
+          className="block mt-3 text-center text-sm text-indigo-600 hover:underline"
+        >
+          View Details →
+        </Link>
 
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
