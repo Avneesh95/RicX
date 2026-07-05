@@ -296,10 +296,16 @@ const getDashboardStats = async (req, res) => {
   try {
     const [users, orders, products] = await Promise.all([
       User.countDocuments(),
-      Order.countDocuments(),
+
+      // Count only successful orders
+      Order.countDocuments({
+        paymentStatus: "paid",
+      }),
+
       Product.countDocuments(),
     ]);
 
+    // Revenue from paid orders only
     const revenueResult = await Order.aggregate([
       {
         $match: {
@@ -316,7 +322,10 @@ const getDashboardStats = async (req, res) => {
       },
     ]);
 
-    const recentOrders = await Order.find()
+    // Show only successful orders in dashboard
+    const recentOrders = await Order.find({
+      paymentStatus: "paid",
+    })
       .populate("user", "name email")
       .sort({ createdAt: -1 })
       .limit(5);
@@ -328,14 +337,16 @@ const getDashboardStats = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      products,
       users,
+      products,
       orders,
       revenue: revenueResult[0]?.totalRevenue || 0,
       recentOrders,
       latestUsers,
     });
   } catch (error) {
+    console.error("Dashboard Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,

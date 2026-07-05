@@ -127,5 +127,5 @@ module.exports = {
   authMiddleware,
   isAuthenticated,
   isAdmin,
-  makeAdmin
+  makeAdmin,
 };

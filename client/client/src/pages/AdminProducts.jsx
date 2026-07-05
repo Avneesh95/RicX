@@ -91,39 +91,48 @@ const fetchProducts = async () => {
   };
 
   // ================= UPDATE PRODUCT =================
-  const handleUpdate = async (e) => {
-    e.preventDefault(); // Allows form onSubmit to fire instead of basic onClick
-    try {
-      setSaving(true);
-      console.log("🚀 UPDATING PRODUCT:", selected);
+ const handleUpdate = async (e) => {
+  e.preventDefault();
 
-      const res = await api.put(
-        `/products/${selected._id}`,
-        selected,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  try {
+    setSaving(true);
 
-      console.log("✅ UPDATE RESPONSE:", res.data);
+    const formData = new FormData();
 
-      setProducts((prev) =>
-        prev.map((p) =>
-          p._id === selected._id ? res.data.product || selected : p
-        )
-      );
+    formData.append("name", selected.name);
+    formData.append("price", selected.price);
+    formData.append("stock", selected.stock);
+    formData.append("category", selected.category);
+    formData.append("description", selected.description || "");
 
-      setEditOpen(false);
-    } catch (err) {
-      console.error("❌ UPDATE ERROR:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to update product.");
-    } finally {
-      setSaving(false);
+    if (selected.image instanceof File) {
+      formData.append("image", selected.image);
     }
-  };
 
+    const res = await api.put(
+      `/products/${selected._id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setProducts((prev) =>
+      prev.map((p) =>
+        p._id === selected._id ? res.data.product : p
+      )
+    );
+
+    setEditOpen(false);
+  } catch (err) {
+    console.log(err);
+    alert(err.response?.data?.message || "Update failed");
+  } finally {
+    setSaving(false);
+  }
+};
   // ================= IMAGE HANDLER =================
   const getImage = (img) => {
     if (!img) return "https://via.placeholder.com/100";

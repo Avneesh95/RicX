@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import OrderTimeline from "../components/Ordertimeline";
 import {
   Package,
   MapPin,
@@ -248,11 +249,13 @@ const fetchOrder = async () => {
                 <p className="text-gray-600">
                   Quantity : {item.quantity}
                 </p>
-
+                
                 <p className="font-semibold text-green-600">
                   ₹{item.price}
                 </p>
 
+//timeline
+                <OrderTimeline status={order.status} />
               </div>
 
             </div>

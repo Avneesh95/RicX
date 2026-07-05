@@ -34,6 +34,20 @@ const Products = () => {
   const [totalProducts, setTotalProducts] = useState(0);
 
 
+  const lowStock = products.filter(
+  (p) => p.stock > 0 && p.stock <= 5
+).length;
+
+const outOfStock = products.filter(
+  (p) => p.stock === 0
+).length;
+
+const inventoryValue = products.reduce(
+  (sum, p) => sum + p.price * p.stock,
+  0
+);
+
+
   // ===========================
   // Fetch Products
   // ===========================
@@ -153,138 +167,74 @@ const Products = () => {
 
   {/* Filters */}
 
-  <div className="bg-white rounded-2xl shadow-lg p-6">
+ {/* =========================== */}
+{/* Filters */}
+{/* =========================== */}
 
-    <div className="grid md:grid-cols-3 gap-5">
+<div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
 
-      {/* Search */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-      <div className="relative">
+    {/* Search */}
 
-        <Search
-          className="absolute left-4 top-3.5 text-gray-400"
-          size={18}
-        />
+    <div className="relative">
 
-        <input
-          type="text"
-          placeholder="Search product..."
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="w-full border rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
-        />
+      <Search
+        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+        size={18}
+      />
 
-      </div>
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        className="w-full border rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-indigo-500 outline-none"
+      />
 
-
-      {/* Statistics */}
-
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
-  <div className="bg-white rounded-2xl shadow-lg p-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-gray-500">Products</p>
-        <h2 className="text-3xl font-bold mt-2">
-          {totalProducts}
-        </h2>
-      </div>
-
-      <div className="bg-blue-100 p-4 rounded-xl">
-        <Boxes className="text-blue-600" size={30} />
-      </div>
     </div>
-  </div>
 
-  <div className="bg-white rounded-2xl shadow-lg p-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-gray-500">Low Stock</p>
-        <h2 className="text-3xl font-bold mt-2">
-          {lowStock}
-        </h2>
-      </div>
+    {/* Category */}
 
-      <div className="bg-yellow-100 p-4 rounded-xl">
-        <AlertTriangle className="text-yellow-600" size={30} />
-      </div>
-    </div>
-  </div>
+    <select
+      value={category}
+      onChange={(e) => {
+        setCategory(e.target.value);
+        setPage(1);
+      }}
+      className="border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500"
+    >
+      <option value="All">All Categories</option>
+      <option value="Mobile">Mobile</option>
+      <option value="Laptop">Laptop</option>
+      <option value="Headphones">Headphones</option>
+      <option value="Accessories">Accessories</option>
+    </select>
 
-  <div className="bg-white rounded-2xl shadow-lg p-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-gray-500">Out of Stock</p>
-        <h2 className="text-3xl font-bold mt-2">
-          {outOfStock}
-        </h2>
-      </div>
+    {/* Sort */}
 
-      <div className="bg-red-100 p-4 rounded-xl">
-        <XCircle className="text-red-600" size={30} />
-      </div>
-    </div>
-  </div>
+    <select
+      value={sort}
+      onChange={(e) => {
+        setSort(e.target.value);
+        setPage(1);
+      }}
+      className="border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500"
+    >
+      <option value="newest">Newest First</option>
+      <option value="oldest">Oldest First</option>
+      <option value="price_asc">Price Low → High</option>
+      <option value="price_desc">Price High → Low</option>
+      <option value="name_asc">Name A → Z</option>
+      <option value="name_desc">Name Z → A</option>
+    </select>
 
-  <div className="bg-white rounded-2xl shadow-lg p-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <p className="text-gray-500">Inventory Value</p>
-        <h2 className="text-2xl font-bold mt-2">
-          ₹{inventoryValue.toLocaleString()}
-        </h2>
-      </div>
-
-      <div className="bg-green-100 p-4 rounded-xl">
-        <IndianRupee className="text-green-600" size={30} />
-      </div>
-    </div>
   </div>
 
 </div>
-
-      {/* Category */}
-
-      <select
-        value={category}
-        onChange={(e) => {
-          setPage(1);
-          setCategory(e.target.value);
-        }}
-        className="border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500"
-      >
-        <option value="All">All Categories</option>
-        <option value="Mobile">Mobile</option>
-        <option value="Laptop">Laptop</option>
-        <option value="Headphones">Headphones</option>
-        <option value="Accessories">Accessories</option>
-      </select>
-
-      {/* Sort */}
-
-      <select
-        value={sort}
-        onChange={(e) => {
-          setPage(1);
-          setSort(e.target.value);
-        }}
-        className="border rounded-xl px-4 py-3 focus:ring-2 focus:ring-indigo-500"
-      >
-        <option value="newest">Newest First</option>
-        <option value="oldest">Oldest First</option>
-        <option value="price_asc">Price Low → High</option>
-        <option value="price_desc">Price High → Low</option>
-        <option value="name_asc">Name A → Z</option>
-        <option value="name_desc">Name Z → A</option>
-      </select>
-
-    </div>
-
-  </div>
-
   {/* Products Table */}
 
   <div className="bg-white rounded-2xl shadow-xl overflow-hidden">

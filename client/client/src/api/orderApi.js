@@ -39,18 +39,17 @@ export const cancelOrder = async (id) => {
 // GET ALL ORDERS (ADMIN)
 // ==========================
 export const getAllOrders = async () => {
-  return await api.get("/order/admin/all");
+  return api.get("/order");
 };
 
 // ==========================
 // UPDATE ORDER STATUS (ADMIN)
 // ==========================
 export const updateOrderStatus = async (id, status) => {
-  return await api.put(`/order/status/${id}`, {
+  return await api.put(`/order/${id}`, {
     status,
   });
 };
-
 // ==========================
 // DELETE ORDER (ADMIN)
 // ==========================

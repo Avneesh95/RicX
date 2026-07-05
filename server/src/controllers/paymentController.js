@@ -66,6 +66,8 @@ const createPaymentOrder = async (req, res) => {
 // =========================
 // VERIFY PAYMENT
 // =========================
+const Product = require("../model/ProductModel");
+
 const verifyPayment = async (req, res) => {
   try {
     const {
@@ -75,10 +77,21 @@ const verifyPayment = async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    if (!orderIds || orderIds.length === 0) {
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Order IDs required",
+        message: "Order IDs are required",
+      });
+    }
+
+    const orders = await Order.find({
+      _id: { $in: orderIds },
+    });
+
+    if (orders.length !== orderIds.length) {
+      return res.status(404).json({
+        success: false,
+        message: "One or more orders not found",
       });
     }
 
@@ -87,11 +100,31 @@ const verifyPayment = async (req, res) => {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
+    // =========================
+    // PAYMENT FAILED
+    // =========================
     if (generatedSignature !== razorpay_signature) {
-      await Order.updateMany(
-        { _id: { $in: orderIds } },
-        { paymentStatus: "failed" }
-      );
+
+      // Restore stock
+      for (const order of orders) {
+        for (const item of order.orderItems) {
+          await Product.findByIdAndUpdate(
+            item.product,
+            {
+              $inc: {
+                stock: item.quantity,
+              },
+            }
+          );
+        }
+      }
+
+      // Delete temporary orders
+      await Order.deleteMany({
+        _id: {
+          $in: orderIds,
+        },
+      });
 
       return res.status(400).json({
         success: false,
@@ -99,13 +132,23 @@ const verifyPayment = async (req, res) => {
       });
     }
 
+    // =========================
+    // PAYMENT SUCCESS
+    // =========================
     await Order.updateMany(
-      { _id: { $in: orderIds } },
       {
-        paymentStatus: "paid",
-        status: "confirmed",
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
+        _id: {
+          $in: orderIds,
+        },
+      },
+      {
+        $set: {
+          paymentStatus: "paid",
+          status: "confirmed",
+          razorpayOrderId: razorpay_order_id,
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature,
+        },
       }
     );
 
@@ -113,8 +156,9 @@ const verifyPayment = async (req, res) => {
       success: true,
       message: "Payment verified successfully",
     });
+
   } catch (error) {
-    console.log(error);
+    console.error("VERIFY PAYMENT ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -122,6 +166,7 @@ const verifyPayment = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createPaymentOrder,
   verifyPayment,

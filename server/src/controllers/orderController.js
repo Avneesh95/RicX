@@ -414,9 +414,15 @@ const getOrderById = async (req, res) => {
 // ======================================
 // ADMIN - GET ALL ORDERS
 // ======================================
+// ======================================
+// ADMIN - GET ALL ORDERS
+// ======================================
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    // Show ONLY successful paid orders
+    const orders = await Order.find({
+      paymentStatus: "paid",
+    })
       .populate("user", "name email")
       .populate({
         path: "orderItems.product",
@@ -430,7 +436,7 @@ const getAllOrders = async (req, res) => {
       orders,
     });
   } catch (error) {
-    console.error(error);
+    console.error("GET ALL ORDERS ERROR:", error);
 
     return res.status(500).json({
       success: false,
