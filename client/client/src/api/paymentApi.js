@@ -3,13 +3,13 @@ import api from "./axios";
 // =========================
 // CREATE PAYMENT ORDER
 // =========================
-export const createPaymentOrder = async (orderId) => {
+export const createPaymentOrder = async (orderIds) => {
   try {
     const token = localStorage.getItem("token");
 
     const res = await api.post(
       "/payment/create-order",
-      { orderId },
+      { orderIds },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -17,9 +17,12 @@ export const createPaymentOrder = async (orderId) => {
       }
     );
 
-    return res.data; // 🔥 IMPORTANT: return only data
+    return res.data;
   } catch (error) {
-    console.log("CREATE PAYMENT ERROR:", error.response?.data || error.message);
+    console.log(
+      "CREATE PAYMENT ERROR:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };
@@ -41,9 +44,12 @@ export const verifyPayment = async (body) => {
       }
     );
 
-    return res.data; // 🔥 IMPORTANT
+    return res.data;
   } catch (error) {
-    console.log("VERIFY PAYMENT ERROR:", error.response?.data || error.message);
+    console.log(
+      "VERIFY PAYMENT ERROR:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

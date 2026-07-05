@@ -1,10 +1,17 @@
 import api from "./axios";
 
 // ==========================
-// PLACE ORDER
+// PLACE ORDER (Cart Checkout)
 // ==========================
 export const placeOrder = async (orderData) => {
   return await api.post("/order/place", orderData);
+};
+
+// ==========================
+// BUY NOW ORDER (NEW)
+// ==========================
+export const buyNowOrder = async (orderData) => {
+  return await api.post("/order/buy-now", orderData);
 };
 
 // ==========================
@@ -32,14 +39,14 @@ export const cancelOrder = async (id) => {
 // GET ALL ORDERS (ADMIN)
 // ==========================
 export const getAllOrders = async () => {
-  return await api.get("/order");
+  return await api.get("/order/admin/all");
 };
 
 // ==========================
 // UPDATE ORDER STATUS (ADMIN)
 // ==========================
 export const updateOrderStatus = async (id, status) => {
-  return await api.put(`/order/${id}`, {
+  return await api.put(`/order/status/${id}`, {
     status,
   });
 };
@@ -51,9 +58,9 @@ export const deleteOrder = async (id) => {
   return await api.delete(`/order/${id}`);
 };
 
-
-// PDF invoice generation
-
+// ==========================
+// DOWNLOAD INVOICE (PDF)
+// ==========================
 export const downloadInvoice = async (id) => {
   return await api.get(`/invoice/${id}`, {
     responseType: "blob",

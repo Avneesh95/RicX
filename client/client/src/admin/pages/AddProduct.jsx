@@ -14,8 +14,6 @@ export default function AddProduct() {
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem("token");
-
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -52,14 +50,10 @@ export default function AddProduct() {
       formData.append("stock", form.stock);
       formData.append("image", image);
 
-      const { data } = await api.post("/product/add", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // ✅ Correct API route
+      const { data } = await api.post("/products/add", formData);
 
-      alert(data.message);
+      alert(data.message || "Product added successfully!");
 
       setForm({
         name: "",
@@ -73,7 +67,12 @@ export default function AddProduct() {
       setPreview("");
 
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to add product");
+      console.error(err);
+
+      alert(
+        err.response?.data?.message ||
+          "Failed to add product"
+      );
     } finally {
       setLoading(false);
     }
@@ -86,10 +85,7 @@ export default function AddProduct() {
         Add Product
       </h1>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5"
-      >
+      <form onSubmit={handleSubmit} className="space-y-5">
 
         <input
           type="text"
@@ -145,6 +141,7 @@ export default function AddProduct() {
           type="file"
           accept="image/*"
           onChange={handleImage}
+          required
           className="w-full"
         />
 
@@ -159,7 +156,7 @@ export default function AddProduct() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
+          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400"
         >
           {loading ? "Uploading..." : "Add Product"}
         </button>

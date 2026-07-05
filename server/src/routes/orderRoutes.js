@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   placeOrder,
+  buyNowOrder,
   getMyOrders,
   getOrderById,
   getAllOrders,
@@ -20,26 +21,29 @@ const {
 // USER ROUTES
 // ======================
 
-// Place Order
+// Cart Checkout
 router.post("/place", isAuthenticated, placeOrder);
 
-// Get My Orders
+// Buy Now Checkout
+router.post("/buy-now", isAuthenticated, buyNowOrder);
+
+// My Orders
 router.get("/my", isAuthenticated, getMyOrders);
 
 // Cancel Order
 router.put("/cancel/:id", isAuthenticated, cancelOrder);
 
-// Get Single Order Details
+// Single Order
 router.get("/:id", isAuthenticated, getOrderById);
 
 // ======================
 // ADMIN ROUTES
 // ======================
 
-// Get All Orders
+// All Orders
 router.get("/", isAuthenticated, isAdmin, getAllOrders);
 
-// Update Order Status
+// Update Status
 router.put("/:id", isAuthenticated, isAdmin, updateOrderStatus);
 
 // Delete Order
