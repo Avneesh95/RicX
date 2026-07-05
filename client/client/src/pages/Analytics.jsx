@@ -73,35 +73,37 @@ export default function Analytics() {
     try {
       const res = await getAnalytics();
 
-console.log("Analytics Response:", res);
-console.log("Analytics Data:", res.data);
+      const data = res.data;
 
-const data = res.data;
-
+      
       setStats(data.stats);
 
       setMonthlyRevenue(
         data.monthlyRevenue.map((item) => ({
           month: monthNames[item._id.month],
           revenue: item.revenue,
-        }))
+        })),
       );
 
       setMonthlyOrders(
         data.monthlyOrders.map((item) => ({
           month: monthNames[item._id.month],
           orders: item.orders,
-        }))
+        })),
       );
 
       setCategoryStats(
         data.categoryStats.map((item) => ({
           name: item._id,
           value: item.value,
-        }))
+        })),
       );
 
+
       setLowStock(data.lowStock);
+
+
+      
     } catch (err) {
       console.log(err);
     } finally {
@@ -119,12 +121,9 @@ const data = res.data;
 
   return (
     <div className="space-y-8">
-
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold">
-          Analytics Dashboard
-        </h1>
+        <h1 className="text-4xl font-bold">Analytics Dashboard</h1>
 
         <p className="text-gray-500 mt-2">
           Business insights and performance overview
@@ -134,57 +133,41 @@ const data = res.data;
       {/* Summary Cards */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
         <div className="bg-white shadow rounded-2xl p-6">
           <IndianRupee className="text-green-600 mb-3" size={30} />
           <h2 className="text-gray-500">Revenue</h2>
-          <p className="text-3xl font-bold">
-            ₹{stats.totalRevenue}
-          </p>
+          <p className="text-3xl font-bold">₹{stats.totalRevenue}</p>
         </div>
 
         <div className="bg-white shadow rounded-2xl p-6">
           <ShoppingBag className="text-blue-600 mb-3" size={30} />
           <h2 className="text-gray-500">Orders</h2>
-          <p className="text-3xl font-bold">
-            {stats.totalOrders}
-          </p>
+          <p className="text-3xl font-bold">{stats.totalOrders}</p>
         </div>
 
         <div className="bg-white shadow rounded-2xl p-6">
           <Users className="text-purple-600 mb-3" size={30} />
           <h2 className="text-gray-500">Users</h2>
-          <p className="text-3xl font-bold">
-            {stats.totalUsers}
-          </p>
+          <p className="text-3xl font-bold">{stats.totalUsers}</p>
         </div>
 
         <div className="bg-white shadow rounded-2xl p-6">
           <Package className="text-orange-600 mb-3" size={30} />
           <h2 className="text-gray-500">Products</h2>
-          <p className="text-3xl font-bold">
-            {stats.totalProducts}
-          </p>
+          <p className="text-3xl font-bold">{stats.totalProducts}</p>
         </div>
-
       </div>
 
       {/* Charts */}
 
       <div className="grid lg:grid-cols-2 gap-8">
-
         {/* Revenue */}
 
         <div className="bg-white rounded-2xl shadow p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Monthly Revenue
-          </h2>
+          <h2 className="text-xl font-bold mb-5">Monthly Revenue</h2>
 
           <ResponsiveContainer width="100%" height={320}>
-
             <LineChart data={monthlyRevenue}>
-
               <CartesianGrid strokeDasharray="3 3" />
 
               <XAxis dataKey="month" />
@@ -201,25 +184,17 @@ const data = res.data;
                 stroke="#10B981"
                 strokeWidth={3}
               />
-
             </LineChart>
-
           </ResponsiveContainer>
-
         </div>
 
         {/* Orders */}
 
         <div className="bg-white rounded-2xl shadow p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Monthly Orders
-          </h2>
+          <h2 className="text-xl font-bold mb-5">Monthly Orders</h2>
 
           <ResponsiveContainer width="100%" height={320}>
-
             <BarChart data={monthlyOrders}>
-
               <CartesianGrid strokeDasharray="3 3" />
 
               <XAxis dataKey="month" />
@@ -230,29 +205,18 @@ const data = res.data;
 
               <Legend />
 
-              <Bar
-                dataKey="orders"
-                fill="#3B82F6"
-              />
-
+              <Bar dataKey="orders" fill="#3B82F6" />
             </BarChart>
-
           </ResponsiveContainer>
-
         </div>
-
       </div>
-            {/* Category & Low Stock */}
+      {/* Category & Low Stock */}
 
       <div className="grid lg:grid-cols-2 gap-8">
-
         {/* Category Distribution */}
 
         <div className="bg-white rounded-2xl shadow p-6">
-
-          <h2 className="text-xl font-bold mb-5">
-            Products by Category
-          </h2>
+          <h2 className="text-xl font-bold mb-5">Products by Category</h2>
 
           {categoryStats.length === 0 ? (
             <div className="h-[320px] flex items-center justify-center text-gray-400">
@@ -269,10 +233,7 @@ const data = res.data;
                   label
                 >
                   {categoryStats.map((entry, index) => (
-                    <Cell
-                      key={index}
-                      fill={COLORS[index % COLORS.length]}
-                    />
+                    <Cell key={index} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
 
@@ -282,22 +243,15 @@ const data = res.data;
               </PieChart>
             </ResponsiveContainer>
           )}
-
         </div>
 
         {/* Low Stock */}
 
         <div className="bg-white rounded-2xl shadow p-6">
-
           <div className="flex items-center gap-2 mb-5">
-            <AlertTriangle
-              className="text-red-500"
-              size={24}
-            />
+            <AlertTriangle className="text-red-500" size={24} />
 
-            <h2 className="text-xl font-bold">
-              Low Stock Products
-            </h2>
+            <h2 className="text-xl font-bold">Low Stock Products</h2>
           </div>
 
           {lowStock.length === 0 ? (
@@ -306,87 +260,48 @@ const data = res.data;
             </div>
           ) : (
             <div className="overflow-auto">
-
               <table className="w-full">
-
                 <thead>
-
                   <tr className="border-b">
+                    <th className="text-left py-3">Product</th>
 
-                    <th className="text-left py-3">
-                      Product
-                    </th>
+                    <th className="text-left">Category</th>
 
-                    <th className="text-left">
-                      Category
-                    </th>
-
-                    <th className="text-left">
-                      Stock
-                    </th>
-
+                    <th className="text-left">Stock</th>
                   </tr>
-
                 </thead>
 
                 <tbody>
-
                   {lowStock.map((item) => (
+                    <tr key={item._id} className="border-b hover:bg-gray-50">
+                      <td className="py-3 font-medium">{item.name}</td>
 
-                    <tr
-                      key={item._id}
-                      className="border-b hover:bg-gray-50"
-                    >
-
-                      <td className="py-3 font-medium">
-                        {item.name}
-                      </td>
+                      <td>{item.category}</td>
 
                       <td>
-                        {item.category}
-                      </td>
-
-                      <td>
-
                         <span className="px-3 py-1 rounded-full bg-red-100 text-red-600 font-semibold">
-
                           {item.stock}
-
                         </span>
-
                       </td>
-
                     </tr>
-
                   ))}
-
                 </tbody>
-
               </table>
-
             </div>
           )}
-
         </div>
-
       </div>
 
       {/* Footer */}
 
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white">
-
-        <h2 className="text-2xl font-bold">
-          RicX Store Analytics
-        </h2>
+        <h2 className="text-2xl font-bold">RicX Store Analytics</h2>
 
         <p className="mt-2 text-blue-100">
-          Monitor your business performance, identify inventory shortages,
-          track monthly revenue, and make smarter decisions using real-time
-          insights.
+          Monitor your business performance, identify inventory shortages, track
+          monthly revenue, and make smarter decisions using real-time insights.
         </p>
-
       </div>
-
     </div>
   );
 }

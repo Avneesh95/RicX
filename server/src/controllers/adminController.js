@@ -21,19 +21,36 @@ const getTotalUsers = async (req, res) => {
   }
 };
 
-
 // ==============================
 // ANALYTICS
 // ==============================
 const getAnalytics = async (req, res) => {
   try {
+
+    
+
+    const paidOrders = await Order.find({
+  paymentStatus: "paid",
+});
+
+console.table(
+  paidOrders.map((o) => ({
+    id: o._id.toString().slice(-6),
+    paymentStatus: o.paymentStatus,
+    status: o.status,
+  }))
+);
+
     // Basic Counts
-    const [totalUsers, totalProducts, totalOrders] =
-      await Promise.all([
-        User.countDocuments(),
-        Product.countDocuments(),
-        Order.countDocuments(),
-      ]);
+   const totalUsers = await User.countDocuments();
+
+const totalProducts = await Product.countDocuments();
+
+const totalOrders = await Order.countDocuments({
+  paymentStatus: "paid",
+});
+
+console.log("CountDocuments:", totalOrders);
 
     // Revenue
     const revenueResult = await Order.aggregate([
@@ -52,14 +69,16 @@ const getAnalytics = async (req, res) => {
       },
     ]);
 
-    const totalRevenue =
-      revenueResult[0]?.totalRevenue || 0;
+    const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
     // Monthly Revenue
     const monthlyRevenue = await Order.aggregate([
       {
         $match: {
           paymentStatus: "paid",
+          status: {
+            $in: ["confirmed", "shipped", "delivered"],
+          },
         },
       },
       {
@@ -82,26 +101,30 @@ const getAnalytics = async (req, res) => {
     ]);
 
     // Monthly Orders
-    const monthlyOrders = await Order.aggregate([
-      {
-        $group: {
-          _id: {
-            month: {
-              $month: "$createdAt",
-            },
-          },
-          orders: {
-            $sum: 1,
-          },
+   const monthlyOrders = await Order.aggregate([
+  {
+    $match: {
+      paymentStatus: "paid",
+    },
+  },
+  {
+    $group: {
+      _id: {
+        month: {
+          $month: "$createdAt",
         },
       },
-      {
-        $sort: {
-          "_id.month": 1,
-        },
+      orders: {
+        $sum: 1,
       },
-    ]);
-
+    },
+  },
+  {
+    $sort: {
+      "_id.month": 1,
+    },
+  },
+]);
     // Category Distribution
     const categoryStats = await Product.aggregate([
       {
@@ -120,6 +143,13 @@ const getAnalytics = async (req, res) => {
         $lte: 5,
       },
     }).select("name stock category");
+
+    console.log("========== ANALYTICS ==========");
+    console.log("Total Orders:", totalOrders);
+    console.log("Total Revenue:", totalRevenue);
+    console.log("Monthly Orders:", monthlyOrders);
+    console.log("Monthly Revenue:", monthlyRevenue);
+    console.log("===============================");
 
     res.status(200).json({
       success: true,
@@ -152,9 +182,7 @@ const getAnalytics = async (req, res) => {
 // ==============================
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find()
-      .select("-password")
-      .sort({ createdAt: -1 });
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -202,7 +230,9 @@ const deleteUser = async (req, res) => {
 // ==============================
 const getTotalOrders = async (req, res) => {
   try {
-    const totalOrders = await Order.countDocuments();
+   totalOrders = await Order.countDocuments({
+    paymentStatus: "paid",
+}); 
 
     res.status(200).json({
       success: true,
