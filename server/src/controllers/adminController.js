@@ -26,33 +26,20 @@ const getTotalUsers = async (req, res) => {
 // ==============================
 const getAnalytics = async (req, res) => {
   try {
-
-    
-
+    // ===============================
+    // Get all PAID orders once
+    // ===============================
     const paidOrders = await Order.find({
-  paymentStatus: "paid",
-});
+      paymentStatus: "paid",
+    });
 
-console.table(
-  paidOrders.map((o) => ({
-    id: o._id.toString().slice(-6),
-    paymentStatus: o.paymentStatus,
-    status: o.status,
-  }))
-);
+    const totalUsers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    const totalOrders = paidOrders.length;
 
-    // Basic Counts
-   const totalUsers = await User.countDocuments();
-
-const totalProducts = await Product.countDocuments();
-
-const totalOrders = await Order.countDocuments({
-  paymentStatus: "paid",
-});
-
-console.log("CountDocuments:", totalOrders);
-
-    // Revenue
+    // ===============================
+    // Total Revenue
+    // ===============================
     const revenueResult = await Order.aggregate([
       {
         $match: {
@@ -71,22 +58,19 @@ console.log("CountDocuments:", totalOrders);
 
     const totalRevenue = revenueResult[0]?.totalRevenue || 0;
 
+    // ===============================
     // Monthly Revenue
+    // ===============================
     const monthlyRevenue = await Order.aggregate([
       {
         $match: {
           paymentStatus: "paid",
-          status: {
-            $in: ["confirmed", "shipped", "delivered"],
-          },
         },
       },
       {
         $group: {
           _id: {
-            month: {
-              $month: "$createdAt",
-            },
+            month: { $month: "$createdAt" },
           },
           revenue: {
             $sum: "$totalAmount",
@@ -100,76 +84,80 @@ console.log("CountDocuments:", totalOrders);
       },
     ]);
 
+    // ===============================
     // Monthly Orders
-   const monthlyOrders = await Order.aggregate([
-  {
-    $match: {
-      paymentStatus: "paid",
-    },
-  },
-  {
-    $group: {
-      _id: {
-        month: {
-          $month: "$createdAt",
+    // ===============================
+    const monthlyOrders = await Order.aggregate([
+      {
+        $match: {
+          paymentStatus: "paid",
         },
       },
-      orders: {
-        $sum: 1,
-      },
-    },
-  },
-  {
-    $sort: {
-      "_id.month": 1,
-    },
-  },
-]);
-    // Category Distribution
-    const categoryStats = await Product.aggregate([
       {
         $group: {
-          _id: "$category",
-          value: {
+          _id: {
+            month: { $month: "$createdAt" },
+          },
+          orders: {
             $sum: 1,
           },
         },
       },
+      {
+        $sort: {
+          "_id.month": 1,
+        },
+      },
     ]);
 
-    // Low Stock
-    const lowStock = await Product.find({
-      stock: {
-        $lte: 5,
+    // ===============================
+    // Category Distribution
+    // ===============================
+    const categoryStats = await Product.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          value: { $sum: 1 },
+        },
       },
+    ]);
+
+    // ===============================
+    // Low Stock Products
+    // ===============================
+    const lowStock = await Product.find({
+      stock: { $lte: 5 },
     }).select("name stock category");
 
+    // ===============================
+    // Debug Logs
+    // ===============================
     console.log("========== ANALYTICS ==========");
-    console.log("Total Orders:", totalOrders);
-    console.log("Total Revenue:", totalRevenue);
+    console.log("Paid Orders:", totalOrders);
+    console.log("Revenue:", totalRevenue);
     console.log("Monthly Orders:", monthlyOrders);
     console.log("Monthly Revenue:", monthlyRevenue);
     console.log("===============================");
 
+    // ===============================
+    // Response
+    // ===============================
     res.status(200).json({
       success: true,
-
       stats: {
         totalRevenue,
         totalOrders,
         totalUsers,
         totalProducts,
       },
-
       monthlyRevenue,
-
       monthlyOrders,
-
       categoryStats,
-
       lowStock,
     });
   } catch (error) {
+    console.error("Analytics Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,

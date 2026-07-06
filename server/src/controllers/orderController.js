@@ -224,6 +224,7 @@ const getMyOrders = async (req, res) => {
   try {
     const orders = await Order.find({
       user: req.user._id,
+      paymentStatus: "paid", // Only paid orders
     })
       .populate("orderItems.product")
       .sort({ createdAt: -1 });
@@ -339,34 +340,7 @@ const buyNowOrder = async (req, res) => {
   }
 };
 
-// ======================================
-// GET MY ORDERS
-// ======================================
-// const getMyOrders = async (req, res) => {
-//   try {
-//     const orders = await Order.find({
-//       user: req.user._id,
-//     })
-//       .populate({
-//         path: "orderItems.product",
-//         model: "Product",
-//       })
-//       .sort({ createdAt: -1 });
 
-//     return res.status(200).json({
-//       success: true,
-//       count: orders.length,
-//       orders,
-//     });
-//   } catch (error) {
-//     console.error(error);
-
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
 
 // ======================================
 // GET SINGLE ORDER
@@ -411,9 +385,7 @@ const getOrderById = async (req, res) => {
   }
 };
 
-// ======================================
-// ADMIN - GET ALL ORDERS
-// ======================================
+
 // ======================================
 // ADMIN - GET ALL ORDERS
 // ======================================
