@@ -1,6 +1,8 @@
 const cloudinary = require("../config/cloudinary");
 const Product = require("../model/productModel");
 
+const XLSX = require("xlsx");
+
 // =========================
 // Create Product
 // =========================
@@ -279,10 +281,93 @@ const deleteProduct = async (req, res) => {
       message: error.message,
     });
   }
+
+
+
+  
 };
 
+//
+// =========================
+// Bulk Upload Products
+// =========================
+const bulkUploadProducts = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please upload an Excel file",
+      });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, {
+      type: "buffer",
+    });
+
+    const sheet = workbook.Sheets[
+      workbook.SheetNames[0]
+    ];
+
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    if (!rows.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Excel file is empty",
+      });
+    }
+
+    let success = 0;
+    let failed = 0;
+
+    for (const row of rows) {
+      try {
+        const exists = await Product.findOne({
+          name: row.name,
+        });
+
+        if (exists) {
+          failed++;
+          continue;
+        }
+
+        await Product.create({
+          name: row.name,
+          description: row.description,
+          price: Number(row.price),
+          category: row.category,
+          stock: Number(row.stock),
+
+          image: {
+            public_id: "",
+            url: row.image || "",
+          },
+        });
+
+        success++;
+
+      } catch (err) {
+        failed++;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Bulk upload completed",
+      uploaded: success,
+      skipped: failed,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   createProduct,
+  bulkUploadProducts,
   products,
   getProductById,
   updateProduct,

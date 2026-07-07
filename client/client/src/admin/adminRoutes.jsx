@@ -11,12 +11,12 @@ import EditProduct from "./pages/EditProducts";
 
 import AdminUsers from "../pages/AdminUser";
 import AdminOrders from "../pages/AdminOrder";
+import AdminBulkUpload from "../pages/AdminBulkUpload";
 
 const AdminRoutes = () => {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-
         {/* Dashboard */}
 
         <Route index element={<Dashboard />} />
@@ -27,16 +27,15 @@ const AdminRoutes = () => {
         <Route path="add-product" element={<AddProduct />} />
         <Route path="edit-product/:id" element={<EditProduct />} />
 
-
         {/* Order Management */}
 
         <Route path="orders" element={<AdminOrders />} />
 
+        <Route path="bulk-upload" element={<AdminBulkUpload />} />
 
         {/* Analytics */}
 
         <Route path="analytics" element={<Analytics />} />
-
 
         {/* User Management */}
 

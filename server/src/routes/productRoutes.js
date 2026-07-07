@@ -9,6 +9,7 @@ const {
   getProductById,
   updateProduct,
   deleteProduct,
+  bulkUploadProducts,
 } = require("../controllers/productController");
 
 const {
@@ -54,6 +55,15 @@ router.delete(
   isAuthenticated,
   isAdmin,
   deleteProduct
+);
+
+
+router.post(
+  "/bulk-upload",
+  isAuthenticated,
+  isAdmin,
+  upload.single("file"),
+  bulkUploadProducts,
 );
 
 module.exports = router;

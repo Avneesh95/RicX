@@ -21,6 +21,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminRoutes from "./admin/adminRoutes";
 import AdminProtectedRoute from "./admin/AdminProtectedRoutes";
 
+
 // Theme
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -83,6 +84,7 @@ function App() {
 
           <Route path="/reset-password" element={<ResetPassword />} />
 
+      
           {/* ======================
               404 PAGE
           ====================== */}

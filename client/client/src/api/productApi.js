@@ -3,23 +3,10 @@ import api from "./axios";
 // =========================
 // GET PRODUCTS
 // =========================
-export const getProducts = ({
-  page = 1,
-  limit = 8,
-  search = "",
-  category = "",
-  sort = "newest",
-} = {}) => {
-  return api.get("/products", {
-    params: {
-      page,
-      limit,
-      search,
-      category,
-      sort,
-    },
-  });
+export const getProducts = (page = 1, limit = 8) => {
+  return api.get(`/products?page=${page}&limit=${limit}`);
 };
+
 
 // =========================
 // GET SINGLE PRODUCT
@@ -55,4 +42,14 @@ export const updateProduct = (id, formData) => {
 // =========================
 export const deleteProduct = (id) => {
   return api.delete(`/products/${id}`);
+};
+
+
+
+export const bulkUploadProducts = (formData) => {
+  return api.post("/products/bulk-upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
