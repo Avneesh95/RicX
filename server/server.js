@@ -36,6 +36,8 @@ app.use("/api/payment", require("./src/routes/paymentRoutes"));
 app.use("/api/admin", require("./src/routes/adminRoutes"));
 app.use("/api/invoice", require("./src/routes/invoiceRoutes"));
 
+app.use("/api/wishlist", require("./src/routes/wishlistRoutes"));
+
 // =========================
 // HEALTH CHECK
 // =========================

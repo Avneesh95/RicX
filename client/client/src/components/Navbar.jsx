@@ -1,6 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import {
   ShoppingCart,
+  Heart,
   LogOut,
   User,
   Package,
@@ -12,6 +15,9 @@ import {
 
 import { useTheme } from "../context/ThemeContext";
 
+import { getWishlist } from "../api/wishlistApi";
+import { getCart } from "../api/cartApi";
+
 const Navbar = () => {
   const navigate = useNavigate();
 
@@ -19,6 +25,9 @@ const Navbar = () => {
 
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -28,25 +37,37 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (!token) return;
+
+      try {
+        const wishRes = await getWishlist();
+
+        setWishlistCount(wishRes.data.wishlist?.products?.length || 0);
+
+        const cartRes = await getCart();
+
+        setCartCount(cartRes.data.cart?.items?.length || 0);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchCounts();
+  }, [token]);
+
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 shadow-lg transition-all duration-300">
-
       <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
-
         {/* Logo */}
 
-        <Link
-          to="/"
-          className="group flex items-center gap-3"
-        >
+        <Link to="/" className="group flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg group-hover:rotate-12 group-hover:scale-110 transition duration-500">
-
             <Sparkles className="text-white" size={24} />
-
           </div>
 
           <div>
-
             <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
               RicX
             </h1>
@@ -54,22 +75,18 @@ const Navbar = () => {
             <p className="text-xs text-gray-500 dark:text-gray-400 tracking-widest">
               PREMIUM STORE
             </p>
-
           </div>
         </Link>
 
         {/* Center Menu */}
 
         <div className="hidden lg:flex items-center gap-10">
-
           <Link
             to="/"
             className="relative font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
           >
             Home
-
             <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
-
           </Link>
 
           {token && (
@@ -79,9 +96,27 @@ const Navbar = () => {
                 className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
               >
                 <ShoppingCart size={20} />
-                Cart
-
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+                Cart Cart
                 <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+              </Link>
+
+              <Link
+                to="/wishlist"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-red-500 transition group"
+              >
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+                Wishlist
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
 
               <Link
@@ -90,19 +125,16 @@ const Navbar = () => {
               >
                 <Package size={20} />
                 Orders
-
                 <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
             </>
           )}
-
         </div>
 
         {/* Right Section */}
 
         <div className="flex items-center gap-4">
-
-                    {/* Dark Mode */}
+          {/* Dark Mode */}
 
           <button
             onClick={toggleTheme}

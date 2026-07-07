@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,7 +18,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -29,34 +34,34 @@ export default function Login() {
     try {
       const { data } = await api.post("/auth/login", form);
 
-      console.log("LOGIN RESPONSE:", data); // 🔥 DEBUG
-
-      // ✅ SAVE TOKEN
       if (data?.token) {
         localStorage.setItem("token", data.token);
       }
 
-      // ✅ SAFE USER SAVE (IMPORTANT FIX)
       if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem(
+          "user",
+          JSON.stringify(data.user)
+        );
 
-        // optional shortcut
-        localStorage.setItem("role", data.user.role || "user");
-      } else {
-        console.warn("No user object in login response!");
+        localStorage.setItem(
+          "role",
+          data.user.role || "user"
+        );
       }
 
       setMessage("Login Successful!");
 
       setTimeout(() => {
         navigate("/");
-        window.location.reload(); // 🔥 ensures navbar updates instantly
+        window.location.reload();
       }, 800);
-
     } catch (err) {
       setIsError(true);
+
       setMessage(
-        err.response?.data?.message || "Invalid email or password"
+        err.response?.data?.message ||
+          "Invalid email or password"
       );
     } finally {
       setLoading(false);
@@ -64,95 +69,185 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 px-4">
 
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
-        <h1 className="text-3xl font-bold text-center text-indigo-600">
-          Welcome Back
-        </h1>
+        {/* Header */}
 
-        <p className="text-center text-gray-500 mt-2">
-          Login to your account
-        </p>
+        <div className="text-center">
+
+          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+
+            <LogIn
+              size={34}
+              className="text-white"
+            />
+
+          </div>
+
+          <h1 className="mt-5 text-4xl font-extrabold text-gray-800">
+            Welcome Back
+          </h1>
+
+          <p className="mt-2 text-gray-500">
+            Login to continue shopping on RicX
+          </p>
+
+        </div>
+
+        {/* Alert */}
 
         {message && (
-          <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${
-            isError
-              ? "bg-red-100 text-red-700 border border-red-300"
-              : "bg-green-100 text-green-700 border border-green-300"
-          }`}>
+          <div
+            className={`mt-6 rounded-xl px-4 py-3 text-sm font-medium ${
+              isError
+                ? "bg-red-100 text-red-700 border border-red-300"
+                : "bg-green-100 text-green-700 border border-green-300"
+            }`}
+          >
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        {/* Form */}
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-8 space-y-5"
+        >
 
           {/* Email */}
+
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
+
+            <label className="font-semibold text-gray-700">
+              Email Address
             </label>
 
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <div className="relative mt-2">
+
+              <Mail
+                size={20}
+                className="absolute left-4 top-4 text-gray-400"
+              />
+
+              <input
+                type="email"
+                name="email"
+                required
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className="w-full pl-12 pr-4 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
+              />
+
+            </div>
+
           </div>
 
           {/* Password */}
+
           <div>
-            <label className="block text-sm font-medium mb-1">
+
+            <label className="font-semibold text-gray-700">
               Password
             </label>
 
-            <div className="relative">
+            <div className="relative mt-2">
+
+              <Lock
+                size={20}
+                className="absolute left-4 top-4 text-gray-400"
+              />
+
               <input
-                type={showPassword ? "text" : "password"}
+                type={
+                  showPassword
+                    ? "text"
+                    : "password"
+                }
                 name="password"
+                required
                 value={form.password}
                 onChange={handleChange}
-                required
-                className="w-full border rounded-lg px-4 py-3 pr-16 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Enter your password"
+                className="w-full pl-12 pr-12 py-3 rounded-xl border focus:ring-2 focus:ring-indigo-500 outline-none"
               />
 
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-sm text-indigo-600"
+                onClick={() =>
+                  setShowPassword(
+                    !showPassword
+                  )
+                }
+                className="absolute right-4 top-4 text-gray-500"
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
               </button>
+
             </div>
+
           </div>
 
-          {/* Submit */}
+          {/* Forgot Password */}
+
+          <div className="flex justify-end">
+
+            <Link
+              to="/forgot-password"
+              className="text-sm text-indigo-600 hover:underline font-medium"
+            >
+              Forgot Password?
+            </Link>
+
+          </div>
+
+          {/* Button */}
+
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 rounded-lg text-white font-semibold transition ${
+            className={`w-full py-3 rounded-xl text-white font-bold transition-all ${
               loading
                 ? "bg-gray-400 cursor-not-allowed"
-                : "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.02] hover:shadow-xl"
             }`}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading
+              ? "Logging In..."
+              : "Login"}
           </button>
 
         </form>
 
-        <p className="text-center text-gray-500 mt-6">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-indigo-600 font-semibold">
-            Register
-          </Link>
-        </p>
+        {/* Register */}
+
+        <div className="mt-8 text-center">
+
+          <p className="text-gray-600">
+
+            Don't have an account?{" "}
+
+            <Link
+              to="/register"
+              className="font-bold text-indigo-600 hover:underline"
+            >
+              Register Now
+            </Link>
+
+          </p>
+
+        </div>
 
       </div>
+
     </div>
   );
 }
+

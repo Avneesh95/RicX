@@ -1,294 +1,207 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import {
   ShoppingCart,
-  User,
-  Shield,
   LogOut,
-  Heart,
-  Search,
-  Menu,
-  X,
+  User,
   Package,
+  LayoutDashboard,
+  Sparkles,
+  Moon,
+  Sun,
+  Heart,
 } from "lucide-react";
+
+import { useTheme } from "../../context/ThemeContext";
+import { getWishlist } from "../../api/wishlistApi";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [search, setSearch] = useState("");
+  const { darkMode, toggleTheme } = useTheme();
 
+  const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleLogout = () => {
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!token) return;
+
+      try {
+        const res = await getWishlist();
+
+        setWishlistCount(res.data.wishlist?.products?.length || 0);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchWishlist();
+  }, [token]);
+
+  const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("role");
 
     navigate("/login");
-    window.location.reload();
-  };
-
-  const handleSearch = (e) => {
-    if (e.key === "Enter") {
-      console.log(search);
-    }
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b shadow-sm">
-
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 shadow-lg transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
         {/* Logo */}
+        <Link to="/" className="group flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg group-hover:rotate-12 group-hover:scale-110 transition duration-500">
+            <Sparkles className="text-white" size={24} />
+          </div>
 
-        <Link
-          to="/"
-          className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
-        >
-          RicX
-        </Link>
+          <div>
+            <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+              RicX
+            </h1>
 
-        {/* Desktop Menu */}
-
-        <div className="hidden lg:flex items-center gap-8">
-
+            <p className="text-xs text-gray-500 dark:text-gray-400 tracking-widest">
+              PREMIUM STORE
+            </p>
+          </div>
+        </Link>{" "}
+        {/* Center Menu */}
+        <div className="hidden lg:flex items-center gap-10">
           <Link
             to="/"
-            className="font-semibold hover:text-indigo-600 transition"
+            className="relative font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
           >
             Home
+            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
           </Link>
 
-          <a
-            href="#categories"
-            className="font-semibold hover:text-indigo-600 transition"
-          >
-            Categories
-          </a>
+          {token && (
+            <>
+              {/* Wishlist */}
 
-          <a
-            href="#products"
-            className="font-semibold hover:text-indigo-600 transition"
-          >
-            Products
-          </a>
+              <Link
+                to="/wishlist"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-red-500 transition group"
+              >
+                <Heart size={20} />
+                Wishlist
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-4 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-red-500 group-hover:w-full transition-all duration-300"></span>
+              </Link>
 
-          <Link
-            to="/orders"
-            className="font-semibold hover:text-indigo-600 transition"
-          >
-            Orders
-          </Link>
+              {/* Cart */}
 
-        </div>
+              <Link
+                to="/cart"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
+              >
+                <ShoppingCart size={20} />
+                Cart
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+              </Link>
 
-        {/* Search */}
+              {/* Orders */}
 
-        <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-80">
-
-          <Search
-            size={18}
-            className="text-gray-500"
-          />
-
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            onKeyDown={handleSearch}
-            className="bg-transparent outline-none px-3 w-full"
-          />
-
-        </div>
-
-                {/* Right Side */}
-
-        <div className="flex items-center gap-3">
-
-          {/* Wishlist */}
-
-          <button className="hidden md:flex w-11 h-11 rounded-full bg-gray-100 hover:bg-red-500 hover:text-white transition items-center justify-center shadow">
-
-            <Heart size={20} />
-
-          </button>
-
-          {/* Orders */}
-
-          <Link
-            to="/orders"
-            className="hidden md:flex w-11 h-11 rounded-full bg-gray-100 hover:bg-indigo-600 hover:text-white transition items-center justify-center shadow"
-          >
-
-            <Package size={20} />
-
-          </Link>
-
-          {/* Cart */}
-
-          <Link
-            to="/cart"
-            className="relative flex w-11 h-11 rounded-full bg-gray-100 hover:bg-indigo-600 hover:text-white transition items-center justify-center shadow"
-          >
-
-            <ShoppingCart size={20} />
-
-            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-              0
-            </span>
-
-          </Link>
-
-          {/* Admin */}
-
-          {user?.role === "admin" && (
-
-            <Link
-              to="/admin"
-              className="hidden lg:flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl transition"
-            >
-
-              <Shield size={18} />
-
-              Admin
-
-            </Link>
-
+              <Link
+                to="/orders"
+                className="relative flex items-center gap-2 text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition group"
+              >
+                <Package size={20} />
+                Orders
+                <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
+              </Link>
+            </>
           )}
-
-          {/* Login / Logout */}
-
-          {!user ? (
-
-            <Link
-              to="/login"
-              className="hidden md:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl transition shadow"
-            >
-
-              <User size={18} />
-
-              Login
-
-            </Link>
-
-          ) : (
-
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl transition shadow"
-            >
-
-              <LogOut size={18} />
-
-              Logout
-
-            </button>
-
-          )}
-
-          {/* Mobile Menu Button */}
+        </div>
+        {/* Right Section */}
+        <div className="flex items-center gap-4">
+          {/* Dark Mode */}
 
           <button
-            onClick={() =>
-              setMobileMenu(!mobileMenu)
-            }
-            className="lg:hidden"
+            onClick={toggleTheme}
+            className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 hover:rotate-180 transition-all duration-500 flex items-center justify-center shadow-md"
           >
-
-            {mobileMenu ? (
-              <X size={30} />
+            {darkMode ? (
+              <Sun className="text-yellow-400" size={20} />
             ) : (
-              <Menu size={30} />
+              <Moon className="text-gray-700" size={20} />
             )}
-
           </button>
 
-        </div>
+          {token ? (
+            <>
+              {/* Profile */}
 
-      </div>
-
-            {/* Mobile Menu */}
-
-      {mobileMenu && (
-        <div className="lg:hidden bg-white border-t shadow-lg">
-
-          <div className="flex flex-col px-6 py-5 space-y-4">
-
-            <Link
-              to="/"
-              onClick={() => setMobileMenu(false)}
-              className="font-semibold hover:text-indigo-600 transition"
-            >
-              Home
-            </Link>
-
-            <a
-              href="#categories"
-              onClick={() => setMobileMenu(false)}
-              className="font-semibold hover:text-indigo-600 transition"
-            >
-              Categories
-            </a>
-
-            <a
-              href="#products"
-              onClick={() => setMobileMenu(false)}
-              className="font-semibold hover:text-indigo-600 transition"
-            >
-              Products
-            </a>
-
-            <Link
-              to="/orders"
-              onClick={() => setMobileMenu(false)}
-              className="font-semibold hover:text-indigo-600 transition"
-            >
-              My Orders
-            </Link>
-
-            <Link
-              to="/cart"
-              onClick={() => setMobileMenu(false)}
-              className="font-semibold hover:text-indigo-600 transition"
-            >
-              Cart
-            </Link>
-
-            {user?.role === "admin" && (
               <Link
-                to="/admin"
-                onClick={() => setMobileMenu(false)}
-                className="bg-slate-900 text-white text-center py-3 rounded-xl hover:bg-slate-800 transition"
+                to="/profile"
+                className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 px-3 py-2 rounded-full transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105"
               >
-                Admin Dashboard
-              </Link>
-            )}
+                {user?.avatar?.url ? (
+                  <img
+                    src={user.avatar.url}
+                    alt="avatar"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-white"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 flex items-center justify-center text-white">
+                    <User size={18} />
+                  </div>
+                )}
 
-            {!user ? (
+                <span className="font-semibold hidden md:block">
+                  {user?.name}
+                </span>
+              </Link>
+
+              {/* Admin */}
+
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+                >
+                  <LayoutDashboard size={18} />
+                  Admin
+                </Link>
+              )}
+
+              {/* Logout */}
+
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-red-600 hover:text-white transition-all duration-300 shadow-md hover:scale-105"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
               <Link
                 to="/login"
-                onClick={() => setMobileMenu(false)}
-                className="bg-indigo-600 text-white text-center py-3 rounded-xl hover:bg-indigo-700 transition"
+                className="font-semibold text-gray-700 dark:text-gray-200 hover:text-indigo-600 transition"
               >
                 Login
               </Link>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white py-3 rounded-xl hover:bg-red-600 transition"
+
+              <Link
+                to="/register"
+                className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
               >
-                Logout
-              </button>
-            )}
-
-          </div>
-
+                Register
+              </Link>
+            </>
+          )}
         </div>
-      )}
-
+      </div>
     </nav>
   );
 };

@@ -51,14 +51,13 @@ const registerUser = async (req, res) => {
     await sendEmail(
       email,
       "Email Verification OTP",
-      `Your OTP is ${otp}. It expires in 10 minutes.`
+      `Your OTP is ${otp}. It expires in 10 minutes.`,
     );
 
     return res.status(200).json({
       success: true,
       message: "OTP sent successfully",
     });
-
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -123,7 +122,6 @@ const verifyRegisterOtp = async (req, res) => {
       success: true,
       message: "User registered successfully",
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -164,11 +162,9 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "30d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "30d",
+    });
 
     return res.status(200).json({
       success: true,
@@ -178,10 +174,9 @@ const loginUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,   
+        role: user.role,
       },
     });
-
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -189,8 +184,6 @@ const loginUser = async (req, res) => {
     });
   }
 };
-
-
 
 // =========================
 // GET MY PROFILE
@@ -218,7 +211,6 @@ const getMyProfile = async (req, res) => {
   }
 };
 
-
 // =========================
 // UPDATE PROFILE
 // =========================
@@ -233,8 +225,29 @@ const updateProfile = async (req, res) => {
       });
     }
 
+    // =========================
+    // Basic Info
+    // =========================
+
     user.name = req.body.name || user.name;
     user.phone = req.body.phone || user.phone;
+    user.gender = req.body.gender || user.gender;
+
+    if (req.body.dateOfBirth) {
+      user.dateOfBirth = req.body.dateOfBirth;
+    }
+
+    // =========================
+    // Addresses
+    // =========================
+
+    if (req.body.addresses) {
+      user.addresses = JSON.parse(req.body.addresses);
+    }
+
+    // =========================
+    // Avatar
+    // =========================
 
     if (req.file) {
       if (user.avatar?.public_id) {
@@ -264,21 +277,21 @@ const updateProfile = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
       user,
     });
+
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
-
-
 // GET ALL USERS (ADMIN ONLY)
 const getAllUsers = async (req, res) => {
   try {
@@ -299,8 +312,6 @@ const getAllUsers = async (req, res) => {
     });
   }
 };
-
-
 
 /* =========================
    FORGOT PASSWORD
@@ -325,7 +336,7 @@ const forgetPassword = async (req, res) => {
     await sendEmail(
       email,
       "Password Reset OTP",
-      `Your OTP is ${otp}. It expires in 10 minutes.`
+      `Your OTP is ${otp}. It expires in 10 minutes.`,
     );
 
     return res.json({
@@ -381,6 +392,149 @@ const resetPassword = async (req, res) => {
   }
 };
 
+//Change PAssword
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+
+    if (!match) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//Add address
+
+const addAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (req.body.isDefault) {
+      user.addresses.forEach((a) => (a.isDefault = false));
+    }
+
+    user.addresses.push(req.body);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Address added successfully",
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//Update Address
+const updateAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    const address = user.addresses.id(req.params.id);
+
+    if (!address) {
+      return res.status(404).json({
+        success: false,
+        message: "Address not found",
+      });
+    }
+
+    if (req.body.isDefault) {
+      user.addresses.forEach((a) => (a.isDefault = false));
+    }
+
+    Object.assign(address, req.body);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Address updated",
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// delete address
+
+const deleteAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    user.addresses.pull(req.params.id);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Address deleted",
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//make default address
+
+const makeDefaultAddress = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    user.addresses.forEach((a) => {
+      a.isDefault = a._id.toString() === req.params.id;
+    });
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Default address updated",
+      addresses: user.addresses,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 /* =========================
    EXPORTS
 ========================= */
@@ -391,9 +545,12 @@ module.exports = {
   forgetPassword,
   resetPassword,
   getAllUsers,
-
-
   getMyProfile,
-  updateProfile
+  updateProfile,
 
+  changePassword,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  makeDefaultAddress,
 };
