@@ -1,5 +1,6 @@
-import Analytics from "../pages/Analytics";
 import { Routes, Route } from "react-router-dom";
+
+import Analytics from "../pages/Analytics";
 
 import AdminLayout from "./AdminLayout";
 
@@ -17,29 +18,27 @@ const AdminRoutes = () => {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-        {/* Dashboard */}
 
+        {/* Dashboard */}
         <Route index element={<Dashboard />} />
 
-        {/* Product Management */}
-
+        {/* Products */}
         <Route path="products" element={<Products />} />
         <Route path="add-product" element={<AddProduct />} />
         <Route path="edit-product/:id" element={<EditProduct />} />
 
-        {/* Order Management */}
-
+        {/* Orders */}
         <Route path="orders" element={<AdminOrders />} />
 
+        {/* Bulk Upload */}
         <Route path="bulk-upload" element={<AdminBulkUpload />} />
 
         {/* Analytics */}
-
         <Route path="analytics" element={<Analytics />} />
 
-        {/* User Management */}
-
+        {/* Users */}
         <Route path="users" element={<AdminUsers />} />
+
       </Route>
     </Routes>
   );

@@ -8,9 +8,6 @@ const addressSchema = new mongoose.Schema(
     city: String,
     state: String,
     pincode: String,
-
-    
-
     country: {
       type: String,
       default: "India",
@@ -20,7 +17,7 @@ const addressSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { _id: true },
+  { _id: true }
 );
 
 const userSchema = new mongoose.Schema(
@@ -62,7 +59,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "superAdmin"],
       default: "user",
     },
 
@@ -88,11 +85,26 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Male", "Female", "Other"],
     },
+
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ===== Granular Admin Permissions =====
+    permissions: {
+      products: { type: Boolean, default: false },
+      orders: { type: Boolean, default: false },
+      users: { type: Boolean, default: false },
+      coupons: { type: Boolean, default: false },
+      reviews: { type: Boolean, default: false },
+      dashboard: { type: Boolean, default: false },
+      analytics: { type: Boolean, default: false },
+    },
   },
   {
     timestamps: true,
   }
 );
-
 
 module.exports = mongoose.model("User", userSchema);

@@ -8,7 +8,11 @@ export default function AdminProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!user || user.role !== "admin") {
+  if (
+    !user ||
+    (user.role !== "admin" &&
+      user.role !== "superAdmin")
+  ) {
     return <Navigate to="/" replace />;
   }
 

@@ -43,12 +43,21 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+
+    numReviews: {
+      type: Number,
+      default: 0,
+    },
   },
+
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports =
-  mongoose.models.Product ||
-  mongoose.model("Product", productSchema);
+  mongoose.models.Product || mongoose.model("Product", productSchema);

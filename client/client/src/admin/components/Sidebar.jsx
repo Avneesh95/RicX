@@ -8,6 +8,7 @@ import {
   LogOut,
   BarChart3,
   ShoppingBag,
+  ShieldCheck,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -15,6 +16,11 @@ const Sidebar = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
+
+  const isAdmin =
+    role === "admin" || role === "superAdmin";
+
+  const isSuperAdmin = role === "superAdmin";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -28,33 +34,45 @@ const Sidebar = () => {
       name: "Dashboard",
       icon: <LayoutDashboard size={20} />,
       path: "/admin",
+      show: isAdmin,
     },
     {
       name: "Analytics",
       icon: <BarChart3 size={20} />,
       path: "/admin/analytics",
-      show: role === "admin",
+      show: isAdmin,
     },
     {
       name: "Products",
       icon: <Package size={20} />,
       path: "/admin/products",
+      show: isAdmin,
     },
     {
       name: "Add Product",
       icon: <PlusCircle size={20} />,
       path: "/admin/add-product",
+      show: isAdmin,
     },
     {
       name: "Manage Orders",
       icon: <ShoppingBag size={20} />,
       path: "/admin/orders",
+      show: isAdmin,
     },
     {
       name: "Users",
       icon: <Users size={20} />,
       path: "/admin/users",
-      show: role === "admin",
+      show: isAdmin,
+    },
+
+    // Only Super Admin
+    {
+      name: "Admin Management",
+      icon: <ShieldCheck size={20} />,
+      path: "/admin/admin-management",
+      show: isSuperAdmin,
     },
   ];
 
@@ -63,21 +81,38 @@ const Sidebar = () => {
 
       {/* Logo */}
       <div className="px-6 py-7 border-b border-slate-700">
-        <h1 className="text-4xl font-extrabold text-blue-500">RicX</h1>
-        <p className="text-sm text-slate-400 mt-2">Admin Dashboard</p>
+
+        <h1 className="text-4xl font-extrabold text-blue-500">
+          RicX
+        </h1>
+
+        <p className="text-sm text-slate-400 mt-2">
+          {isSuperAdmin ? "Super Admin Panel" : "Admin Dashboard"}
+        </p>
 
         {user && (
           <div className="mt-5 bg-slate-800 rounded-xl p-3">
+
             <p className="font-semibold">{user.name}</p>
-            <p className="text-xs text-slate-400">{user.email}</p>
+
+            <p className="text-xs text-slate-400">
+              {user.email}
+            </p>
+
+            <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-blue-600 text-white">
+              {role}
+            </span>
+
           </div>
         )}
+
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
+
         {menuItems
-          .filter((item) => item.show !== false)
+          .filter((item) => item.show)
           .map((item) => (
             <NavLink
               key={item.name}
@@ -95,6 +130,7 @@ const Sidebar = () => {
               <span>{item.name}</span>
             </NavLink>
           ))}
+
       </nav>
 
       {/* Bottom */}
@@ -117,11 +153,17 @@ const Sidebar = () => {
         </button>
 
         <div className="text-center pt-2">
-          <p className="text-xs text-slate-500">© 2026 RicX Store</p>
-          <p className="text-[11px] text-slate-600 mt-1">Version 1.0</p>
+          <p className="text-xs text-slate-500">
+            © 2026 RicX Store
+          </p>
+
+          <p className="text-[11px] text-slate-600 mt-1">
+            Version 1.0
+          </p>
         </div>
 
       </div>
+
     </aside>
   );
 };

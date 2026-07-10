@@ -11,16 +11,13 @@ import Orders from "./pages/Orders";
 import OrderSuccess from "./pages/OrderSuccess";
 import Profile from "./pages/Profile";
 import OrderDetails from "./pages/OrderDetails";
-
 import Wishlist from "./pages/Wishlist";
-
 import ForgotPassword from "./pages/ForgetPassword";
 import ResetPassword from "./pages/ResetPassword";
 
 // Admin
 import AdminRoutes from "./admin/adminRoutes";
 import AdminProtectedRoute from "./admin/AdminProtectedRoutes";
-
 
 // Theme
 import { ThemeProvider } from "./context/ThemeContext";
@@ -34,38 +31,36 @@ function App() {
               USER ROUTES
           ====================== */}
 
-          {/* Home */}
           <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
 
-          {/* Product */}
           <Route path="/product/:id" element={<ProductDetails />} />
 
-          {/* Cart */}
           <Route path="/cart" element={<Cart />} />
 
-          {/* Checkout */}
           <Route path="/checkout" element={<Checkout />} />
 
-          {/* Orders */}
           <Route path="/orders" element={<Orders />} />
 
           <Route path="/order/:id" element={<OrderDetails />} />
 
           <Route path="/wishlist" element={<Wishlist />} />
 
-          {/* Profile */}
           <Route path="/profile" element={<Profile />} />
 
-          {/* Success */}
           <Route path="/success" element={<OrderSuccess />} />
 
           {/* Authentication */}
+
           <Route path="/register" element={<Register />} />
 
           <Route path="/login" element={<Login />} />
 
           <Route path="/otp" element={<OTP />} />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* ======================
               ADMIN ROUTES
@@ -80,11 +75,6 @@ function App() {
             }
           />
 
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-
-          <Route path="/reset-password" element={<ResetPassword />} />
-
-      
           {/* ======================
               404 PAGE
           ====================== */}
@@ -92,9 +82,11 @@ function App() {
           <Route
             path="*"
             element={
-              <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950 transition-colors duration-300">
+              <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-950">
                 <div className="text-center">
-                  <h1 className="text-7xl font-bold text-red-500">404</h1>
+                  <h1 className="text-7xl font-bold text-red-500">
+                    404
+                  </h1>
 
                   <p className="text-gray-600 dark:text-gray-300 mt-4 text-lg">
                     Page Not Found

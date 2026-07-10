@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-export default function AdminProtectedRoute({ children }) {
+export default function SuperAdminProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -8,8 +8,8 @@ export default function AdminProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!user || user.role !== "admin") {
-    return <Navigate to="/" replace />;
+  if (!user || user.role !== "superAdmin") {
+    return <Navigate to="/admin" replace />;
   }
 
   return children;

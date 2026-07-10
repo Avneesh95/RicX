@@ -25,30 +25,45 @@ const Dashboard = () => {
   const [latestUsers, setLatestUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSuperAdmin = user?.role === "superAdmin";
+
   useEffect(() => {
     fetchDashboard();
   }, []);
 
-  const fetchDashboard = async () => {
-    try {
-      const res = await api.get("/admin/dashboard");
+ const fetchDashboard = async () => {
+  try {
+    const endpoint = isSuperAdmin
+      ? "/super-admin/dashboard"
+      : "/admin/dashboard";
 
-      setStats({
-        products: res.data.products || 0,
-        users: res.data.users || 0,
-        orders: res.data.orders || 0,
-        revenue: res.data.revenue || 0,
-      });
+    const res = await api.get(endpoint);
 
-      setRecentOrders(res.data.recentOrders || []);
-      setLatestUsers(res.data.latestUsers || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setStats({
+      products: res.data.products || res.data.stats?.products || 0,
+      users: res.data.users || res.data.stats?.users || 0,
+      orders: res.data.orders || res.data.stats?.orders || 0,
+      revenue: res.data.revenue || res.data.stats?.revenue || 0,
+    });
 
+    setRecentOrders(
+      res.data.recentOrders ||
+      res.data.stats?.recentOrders ||
+      []
+    );
+
+    setLatestUsers(
+      res.data.latestUsers ||
+      res.data.stats?.latestUsers ||
+      []
+    );
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
   if (loading) {
     return (
       <div className="h-[80vh] flex justify-center items-center">
@@ -85,7 +100,7 @@ const Dashboard = () => {
       color: "bg-green-600",
     },
   ];
-    const actions = [
+  const actions = [
     {
       title: "Manage Products",
       icon: <Package size={30} />,
@@ -122,97 +137,91 @@ const Dashboard = () => {
       link: "/admin/analytics",
       color: "bg-pink-600",
     },
-  ];
 
+    // Super Admin only
+    ...(isSuperAdmin
+      ? [
+          {
+            title: "Manage Admins",
+            icon: <Users size={30} />,
+            link: "/admin/users",
+            color: "bg-red-600",
+          },
+        ]
+      : []),
+  ];
   return (
     <div className="space-y-8">
-
       {/* Hero */}
 
       <div className="rounded-3xl bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 p-8 text-white shadow-xl">
-
         <h1 className="text-4xl font-bold">
-          Welcome Back 👋
+          {isSuperAdmin ? "Welcome Super Admin 👑" : "Welcome Back 👋"}
         </h1>
 
         <p className="mt-3 text-blue-100 text-lg">
-          Manage your products, users, orders and monitor your store
-          performance from one powerful dashboard.
+          {isSuperAdmin
+            ? "You have complete platform control."
+            : "Manage your products, users and orders."}
         </p>
-
       </div>
+
+      {isSuperAdmin && (
+        <div className="bg-gradient-to-r from-red-600 to-purple-700 text-white rounded-2xl p-6 shadow-xl">
+          <h2 className="text-2xl font-bold">👑 Super Admin Access</h2>
+
+          <p className="mt-2 opacity-90">
+            You have full control over the platform including admin management,
+            user permissions, coupons, analytics and platform settings.
+          </p>
+        </div>
+      )}
 
       {/* Stats */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-
         {statsData.map((item, index) => (
-          <StatCard
-            key={index}
-            {...item}
-          />
+          <StatCard key={index} {...item} />
         ))}
-
       </div>
-            {/* Quick Actions */}
+      {/* Quick Actions */}
 
       <div>
-
         <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-slate-800">Quick Actions</h2>
 
-          <h2 className="text-2xl font-bold text-slate-800">
-            Quick Actions
-          </h2>
-
-          <span className="text-gray-500">
-            Everything at one place
-          </span>
-
+          <span className="text-gray-500">Everything at one place</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
           {actions.map((item, index) => (
             <Link
               key={index}
               to={item.link}
               className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 p-6"
             >
-
               <div
                 className={`${item.color} w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-5 group-hover:scale-110 transition`}
               >
                 {item.icon}
               </div>
 
-              <h3 className="text-lg font-bold text-slate-800">
-                {item.title}
-              </h3>
+              <h3 className="text-lg font-bold text-slate-800">{item.title}</h3>
 
-              <p className="text-gray-500 mt-2 text-sm">
-                Click to manage
-              </p>
-
+              <p className="text-gray-500 mt-2 text-sm">Click to manage</p>
             </Link>
           ))}
-
         </div>
-
       </div>
 
       {/* Bottom Section */}
 
       <div className="grid lg:grid-cols-2 gap-8">
-
         {/* Recent Orders */}
 
         <div className="bg-white rounded-2xl shadow-lg p-6">
-
           <div className="flex items-center justify-between mb-5">
-
-            <h2 className="text-xl font-bold">
-              Recent Orders
-            </h2>
+            <h2 className="text-xl font-bold">Recent Orders</h2>
 
             <Link
               to="/admin/orders"
@@ -220,34 +229,24 @@ const Dashboard = () => {
             >
               View All →
             </Link>
-
           </div>
 
           {recentOrders.length > 0 ? (
-
             <div className="space-y-4">
-
               {recentOrders.map((order) => (
-
                 <div
                   key={order._id}
                   className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
                 >
-
                   <div>
-
-                    <p className="font-semibold">
-                      #{order._id.slice(-6)}
-                    </p>
+                    <p className="font-semibold">#{order._id.slice(-6)}</p>
 
                     <p className="text-sm text-gray-500">
                       {order.shippingAddress?.fullName}
                     </p>
-
                   </div>
 
                   <div className="text-right">
-
                     <p className="font-bold text-green-600">
                       ₹{order.totalAmount}
                     </p>
@@ -257,41 +256,29 @@ const Dashboard = () => {
                         order.status === "delivered"
                           ? "bg-green-100 text-green-700"
                           : order.status === "confirmed"
-                          ? "bg-blue-100 text-blue-700"
-                          : order.status === "cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
+                            ? "bg-blue-100 text-blue-700"
+                            : order.status === "cancelled"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
                       {order.status}
                     </span>
-
                   </div>
-
                 </div>
-
               ))}
-
             </div>
-
           ) : (
-
             <div className="text-center py-10 text-gray-400">
               No recent orders found.
             </div>
-
           )}
-
         </div>
-                {/* Latest Users */}
+        {/* Latest Users */}
 
         <div className="bg-white rounded-2xl shadow-lg p-6">
-
           <div className="flex items-center justify-between mb-5">
-
-            <h2 className="text-xl font-bold">
-              Latest Users
-            </h2>
+            <h2 className="text-xl font-bold">Latest Users</h2>
 
             <Link
               to="/admin/users"
@@ -299,60 +286,46 @@ const Dashboard = () => {
             >
               View All →
             </Link>
-
           </div>
 
           {latestUsers.length > 0 ? (
-
             <div className="space-y-4">
-
               {latestUsers.map((user) => (
-
                 <div
                   key={user._id}
                   className="flex justify-between items-center border rounded-xl p-4 hover:bg-gray-50 transition"
                 >
-
                   <div>
+                    <p className="font-semibold">{user.name}</p>
 
-                    <p className="font-semibold">
-                      {user.name}
-                    </p>
-
-                    <p className="text-sm text-gray-500">
-                      {user.email}
-                    </p>
-
+                    <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
 
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.role === "admin"
-                        ? "bg-purple-100 text-purple-700"
-                        : "bg-gray-100 text-gray-700"
+                      user.role === "superAdmin"
+                        ? "bg-red-100 text-red-700"
+                        : user.role === "admin"
+                          ? "bg-purple-100 text-purple-700"
+                          : "bg-gray-100 text-gray-700"
                     }`}
                   >
-                    {user.role}
+                    {user.role === "superAdmin"
+                      ? "👑 Super Admin"
+                      : user.role === "admin"
+                        ? "🛡️ Admin"
+                        : "Customer"}
                   </span>
-
                 </div>
-
               ))}
-
             </div>
-
           ) : (
-
             <div className="text-center py-10 text-gray-400">
               No users found.
             </div>
-
           )}
-
         </div>
-
       </div>
-
     </div>
   );
 };

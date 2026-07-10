@@ -1,8 +1,11 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/UserModel");
 
-// Basic JWT verification middleware
-const authMiddleware = (req, res, next) => {
+// ==============================
+// Basic JWT Authentication
+// ==============================
+
+const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -17,65 +20,7 @@ const authMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded;
-
-    next();
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Token expired. Please login again.",
-      });
-    }
-
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
-  }
-};
-
-
-//Make Admin 
-
-const makeAdmin = async (req, res) => {
-    const user = await User.findById(req.params.id);
-
-    if (!user)
-        return res.status(404).json({
-            success: false,
-            message: "User not found"
-        });
-
-    user.role = req.body.role;
-
-    await user.save();
-
-    res.json({
-        success: true,
-        message: "Role updated successfully"
-    });
-};
-
-
-
-// Full authentication middleware
-const isAuthenticated = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({
-        success: false,
-        message: "Please login first",
-      });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -88,23 +33,25 @@ const isAuthenticated = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error);
-
-    if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Token expired. Please login again.",
-      });
-    }
+    console.error(error);
 
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Invalid or expired token",
     });
   }
 };
 
-// Admin middleware
+// ==============================
+// Alias
+// ==============================
+
+const isAuthenticated = authMiddleware;
+
+// ==============================
+// Admin Middleware
+// ==============================
+
 const isAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
@@ -113,7 +60,10 @@ const isAdmin = (req, res, next) => {
     });
   }
 
-  if (req.user.role !== "admin") {
+  if (
+    req.user.role !== "admin" &&
+    req.user.role !== "superAdmin"
+  ) {
     return res.status(403).json({
       success: false,
       message: "Admin access required",
@@ -123,9 +73,35 @@ const isAdmin = (req, res, next) => {
   next();
 };
 
+// ==============================
+// Super Admin Middleware
+// ==============================
+
+const isSuperAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Please login first",
+    });
+  }
+
+  if (req.user.role !== "superAdmin") {
+    return res.status(403).json({
+      success: false,
+      message: "Super Admin access required",
+    });
+  }
+
+  next();
+};
+
+// ==============================
+// Exports
+// ==============================
+
 module.exports = {
   authMiddleware,
   isAuthenticated,
   isAdmin,
-  makeAdmin,
+  isSuperAdmin,
 };
