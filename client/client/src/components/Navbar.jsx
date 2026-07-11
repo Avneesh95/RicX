@@ -11,20 +11,32 @@ import {
   Sparkles,
   Moon,
   Sun,
+  ShieldCheck,
 } from "lucide-react";
 
 import { useTheme } from "../context/ThemeContext";
-
 import { getWishlist } from "../api/wishlistApi";
 import { getCart } from "../api/cartApi";
 
 const Navbar = () => {
   const navigate = useNavigate();
-
   const { darkMode, toggleTheme } = useTheme();
 
   const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user"));
+  
+  // 1. Added variables safely parsed
+  const user = (() => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+      return null;
+    }
+  })();
+
+  const isAdmin = user?.role === "admin";
+  const isSuperAdmin = user?.role === "superAdmin";
 
   const [wishlistCount, setWishlistCount] = useState(0);
   const [cartCount, setCartCount] = useState(0);
@@ -33,35 +45,43 @@ const Navbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("role");
-
+    setWishlistCount(0);
+    setCartCount(0);
     navigate("/login");
   };
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchCounts = async () => {
       if (!token) return;
 
       try {
         const wishRes = await getWishlist();
-
-        setWishlistCount(wishRes.data.wishlist?.products?.length || 0);
+        if (isMounted) {
+          setWishlistCount(wishRes.data.wishlist?.products?.length || 0);
+        }
 
         const cartRes = await getCart();
-
-        setCartCount(cartRes.data.cart?.items?.length || 0);
+        if (isMounted) {
+          setCartCount(cartRes.data.cart?.items?.length || 0);
+        }
       } catch (err) {
         console.log(err);
       }
     };
 
     fetchCounts();
+
+    return () => {
+      isMounted = false;
+    };
   }, [token]);
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-800 shadow-lg transition-all duration-300">
       <div className="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
         {/* Logo */}
-
         <Link to="/" className="group flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg group-hover:rotate-12 group-hover:scale-110 transition duration-500">
             <Sparkles className="text-white" size={24} />
@@ -71,7 +91,6 @@ const Navbar = () => {
             <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
               RicX
             </h1>
-
             <p className="text-xs text-gray-500 dark:text-gray-400 tracking-widest">
               PREMIUM STORE
             </p>
@@ -79,7 +98,6 @@ const Navbar = () => {
         </Link>
 
         {/* Center Menu */}
-
         <div className="hidden lg:flex items-center gap-10">
           <Link
             to="/"
@@ -101,7 +119,7 @@ const Navbar = () => {
                     {cartCount}
                   </span>
                 )}
-                Cart Cart
+                Cart
                 <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
 
@@ -127,15 +145,24 @@ const Navbar = () => {
                 Orders
                 <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-indigo-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
+
+              {isSuperAdmin && (
+                <Link
+                  to="/admin/super-admin"
+                  className="relative flex items-center gap-2 text-red-600 dark:text-red-400 font-bold hover:text-red-700 transition group"
+                >
+                  <ShieldCheck size={20} />
+                  Super Admin
+                  <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-red-600 group-hover:w-full transition-all duration-300"></span>
+                </Link>
+              )}
             </>
           )}
         </div>
 
         {/* Right Section */}
-
         <div className="flex items-center gap-4">
           {/* Dark Mode */}
-
           <button
             onClick={toggleTheme}
             className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-800 hover:scale-110 hover:rotate-180 transition-all duration-500 flex items-center justify-center shadow-md"
@@ -149,8 +176,7 @@ const Navbar = () => {
 
           {token ? (
             <>
-              {/* Profile */}
-
+              {/* Profile Link Wrapper */}
               <Link
                 to="/profile"
                 className="flex items-center gap-3 bg-gray-100 dark:bg-gray-800 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 px-3 py-2 rounded-full transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105"
@@ -167,14 +193,32 @@ const Navbar = () => {
                   </div>
                 )}
 
-                <span className="font-semibold hidden md:block">
-                  {user?.name}
-                </span>
+                {/* 3. Recommended Subtitle Role Text Block */}
+                <div className="hidden md:flex flex-col">
+                  <span className="font-semibold text-sm">
+                    {user?.name}
+                  </span>
+                  <span
+                    className={`text-[10px] uppercase font-bold tracking-wider ${
+                      isSuperAdmin
+                        ? "text-red-500"
+                        : isAdmin
+                          ? "text-indigo-500"
+                          : "text-gray-500"
+                    }`}
+                  >
+                    {isSuperAdmin
+                      ? "👑 Super Admin"
+                      : isAdmin
+                        ? "🛡️ Admin"
+                        : "Customer"}
+                  </span>
+                </div>
               </Link>
 
-              {/* Admin */}
-
-              {user?.role === "admin" && (
+              {/* 2. Unified Dashboards Integration Block */}
+              {/* Admin Dashboard */}
+              {isAdmin && (
                 <Link
                   to="/admin"
                   className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
@@ -184,8 +228,19 @@ const Navbar = () => {
                 </Link>
               )}
 
-              {/* Logout */}
+              {/* Super Admin Dashboard */}
+              {isSuperAdmin && (
+                <Link
+                  to="/admin/super-admin"
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-yellow-500 via-orange-500 to-red-600 text-white shadow-lg hover:scale-105 hover:shadow-2xl transition-all duration-300"
+                >
+                  👑
+                  <LayoutDashboard size={18} />
+                  Super Admin
+                </Link>
+              )}
 
+              {/* Logout */}
               <button
                 onClick={logout}
                 className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gray-200 dark:bg-gray-800 dark:text-white hover:bg-red-600 hover:text-white transition-all duration-300 shadow-md hover:scale-105"

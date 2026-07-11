@@ -1,10 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 
 import Analytics from "../pages/Analytics";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
 import AdminLayout from "./AdminLayout";
 
-// Pages
+// Admin Pages
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import AddProduct from "./pages/AddProduct";
@@ -18,7 +19,6 @@ const AdminRoutes = () => {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-
         {/* Dashboard */}
         <Route index element={<Dashboard />} />
 
@@ -30,7 +30,7 @@ const AdminRoutes = () => {
         {/* Orders */}
         <Route path="orders" element={<AdminOrders />} />
 
-        {/* Bulk Upload */}
+        {/* Bulk Upload / Coupons (Replace later if needed) */}
         <Route path="bulk-upload" element={<AdminBulkUpload />} />
 
         {/* Analytics */}
@@ -39,6 +39,11 @@ const AdminRoutes = () => {
         {/* Users */}
         <Route path="users" element={<AdminUsers />} />
 
+        {/* Super Admin Dashboard */}
+        <Route
+          path="super-admin"
+          element={<SuperAdminDashboard />}
+        />
       </Route>
     </Routes>
   );
