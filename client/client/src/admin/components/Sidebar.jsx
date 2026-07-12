@@ -9,6 +9,7 @@ import {
   BarChart3,
   ShoppingBag,
   ShieldCheck,
+  TicketPercent,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -42,6 +43,12 @@ const Sidebar = () => {
       path: "/admin/analytics",
       show: isAdmin,
     },
+    {
+    name: "Coupons",
+    icon: <TicketPercent size={20} />,
+    path: "/admin/coupons",
+    show: isSuperAdmin,
+},
     {
       name: "Products",
       icon: <Package size={20} />,
@@ -133,6 +140,7 @@ const Sidebar = () => {
 
       </nav>
 
+          
       {/* Bottom */}
       <div className="border-t border-slate-700 p-4 space-y-3">
 

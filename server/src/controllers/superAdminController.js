@@ -184,7 +184,7 @@ exports.removeAdmin = async (req, res) => {
       });
     }
 
-    user.role = "customer";
+    user.role = "user";
 
     user.permissions = {};
 

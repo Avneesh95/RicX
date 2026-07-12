@@ -68,3 +68,19 @@ export const resetCouponUsage = (id) => {
 export const applyCoupon = (data) => {
   return api.post("/coupon/apply", data);
 };
+
+/* ==========================================
+   SET HERO COUPON
+========================================== */
+
+export const setHeroCoupon = (id) => {
+  return api.put(`/coupon/hero/${id}`);
+};
+
+/* ==========================================
+   GET HERO COUPON
+========================================== */
+
+export const getHeroCoupon = () => {
+  return api.get("/coupon/hero");
+};

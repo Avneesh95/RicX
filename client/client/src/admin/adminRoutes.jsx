@@ -3,8 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import Analytics from "../pages/Analytics";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
-import AdminLayout from "./AdminLayout";
+import Coupons from "./pages/AdminCoupon";
 
+import AdminLayout from "./AdminLayout";
+import AdminManagement from "../../src/admin/Admin-management";
 // Admin Pages
 import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
@@ -33,17 +35,17 @@ const AdminRoutes = () => {
         {/* Bulk Upload / Coupons (Replace later if needed) */}
         <Route path="bulk-upload" element={<AdminBulkUpload />} />
 
+        {/* {Coupons} */}
+        <Route path="coupons" element={<Coupons />} />
         {/* Analytics */}
         <Route path="analytics" element={<Analytics />} />
 
+        <Route path="admin-management" element={<AdminManagement />} />
         {/* Users */}
         <Route path="users" element={<AdminUsers />} />
 
         {/* Super Admin Dashboard */}
-        <Route
-          path="super-admin"
-          element={<SuperAdminDashboard />}
-        />
+        <Route path="super-admin" element={<SuperAdminDashboard />} />
       </Route>
     </Routes>
   );

@@ -8,11 +8,15 @@ const {
   deleteCoupon,
   toggleCoupon,
   applyCoupon,
+  setHeroCoupon,
+  getHeroCoupon,
 } = require("../controllers/couponController");
+
 
 const {
   isAuthenticated,
   isAdmin,
+  isSuperAdmin,
 } = require("../middleware/authMiddleware");
 
 router.post(
@@ -48,5 +52,29 @@ router.post(
   isAuthenticated,
   applyCoupon
 );
+
+/* ===========================
+   HERO COUPON
+=========================== */
+
+// Public route (Home Page)
+router.get("/hero", getHeroCoupon);
+
+// Only Super Admin can change Hero Coupon
+router.put(
+  "/hero/:id",
+  isAuthenticated,
+  isAdmin,
+  setHeroCoupon
+);
+
+router.put(
+  "/hero/:id",
+  isAuthenticated,
+  isSuperAdmin,
+  setHeroCoupon
+);
+
+router.get("/hero", getHeroCoupon);
 
 module.exports = router;

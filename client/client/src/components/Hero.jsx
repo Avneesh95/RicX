@@ -1,5 +1,8 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+
+import { getHeroCoupon } from "../api/couponApi";
 
 const fadeLeft = {
   hidden: {
@@ -47,6 +50,7 @@ const stats = [
 ];
 
 const HeroSection = () => {
+  const [heroCoupon, setHeroCoupon] = useState(null);
   const dots = useMemo(
     () =>
       Array.from({ length: 25 }, () => ({

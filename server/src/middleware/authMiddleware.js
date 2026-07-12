@@ -95,6 +95,73 @@ const isSuperAdmin = (req, res, next) => {
   next();
 };
 
+
+/* =====================================================
+   SET HERO COUPON
+===================================================== */
+
+exports.setHeroCoupon = async (req, res) => {
+  try {
+    await Coupon.updateMany(
+      {},
+      {
+        showOnHero: false,
+      }
+    );
+
+    const coupon = await Coupon.findById(req.params.id);
+
+    if (!coupon) {
+      return res.status(404).json({
+        success: false,
+        message: "Coupon not found",
+      });
+    }
+
+    coupon.showOnHero = true;
+
+    await coupon.save();
+
+    res.json({
+      success: true,
+      message: "Hero coupon updated successfully",
+      coupon,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+
+/* =====================================================
+   GET HERO COUPON
+===================================================== */
+
+exports.getHeroCoupon = async (req, res) => {
+  try {
+    const coupon = await Coupon.findOne({
+      showOnHero: true,
+      isActive: true,
+    });
+
+    res.json({
+      success: true,
+      coupon,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
 // ==============================
 // Exports
 // ==============================

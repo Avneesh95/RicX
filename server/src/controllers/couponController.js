@@ -69,6 +69,78 @@ exports.createCoupon = async (req, res) => {
   }
 };
 
+
+/* =====================================================
+   GET ACTIVE HERO COUPON
+===================================================== */
+
+exports.getHeroCoupon = async (req, res) => {
+  try {
+    const coupon = await Coupon.findOne({
+      showOnHero: true,
+      isActive: true,
+    }).sort({
+      updatedAt: -1,
+    });
+
+    if (!coupon) {
+      return res.json({
+        success: true,
+        coupon: null,
+      });
+    }
+
+    res.json({
+      success: true,
+      coupon,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+/* =====================================================
+   SET HERO COUPON
+===================================================== */
+
+exports.setHeroCoupon = async (req, res) => {
+  try {
+    await Coupon.updateMany(
+      {},
+      {
+        showOnHero: false,
+      }
+    );
+
+    const coupon = await Coupon.findById(req.params.id);
+
+    if (!coupon) {
+      return res.status(404).json({
+        success: false,
+        message: "Coupon not found",
+      });
+    }
+
+    coupon.showOnHero = true;
+
+    await coupon.save();
+
+    res.json({
+      success: true,
+      message: "Hero Coupon Updated",
+      coupon,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 /* =====================================================
    GET ALL COUPONS
 ===================================================== */
