@@ -1,5 +1,5 @@
 const PDFDocument = require("pdfkit");
-const Order = require("../model/OrderModel");
+const Order = require("../model/orderModel");
 
 const generateInvoice = async (req, res) => {
   try {

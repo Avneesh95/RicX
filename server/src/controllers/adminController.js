@@ -1,6 +1,6 @@
 const User = require("../model/UserModel");
-const Order = require("../model/OrderModel");
-const Product = require("../model/ProductModel");
+const Order = require("../model/orderModel");
+const Product = require("../model/productModel");
 
 // ==============================
 // TOTAL USERS

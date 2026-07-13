@@ -1,6 +1,6 @@
 const User = require("../model/UserModel");
-const Product = require("../model/ProductModel");
-const Order = require("../model/OrderModel");
+const Product = require("../model/productModel");
+const Order = require("../model/orderModel");
 
 /* ==========================================================
    SUPER ADMIN DASHBOARD
