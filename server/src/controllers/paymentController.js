@@ -66,7 +66,7 @@ const createPaymentOrder = async (req, res) => {
 // =========================
 // VERIFY PAYMENT
 // =========================
-const Product = require("../model/ProductModel");
+const Product = require("../model/productModel");
 
 const verifyPayment = async (req, res) => {
   try {
