@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Analytics from "../pages/Analytics";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
-import Coupons from "./pages/AdminCoupon";
+import Coupons from "./pages/Coupons";
 
 import AdminLayout from "./AdminLayout";
 import AdminManagement from "../../src/admin/Admin-management";

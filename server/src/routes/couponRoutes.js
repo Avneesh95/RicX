@@ -1,5 +1,5 @@
-const express = require("express");
 
+const express = require("express");
 const router = express.Router();
 
 const {
@@ -12,13 +12,38 @@ const {
   getHeroCoupon,
 } = require("../controllers/couponController");
 
-
 const {
   isAuthenticated,
   isAdmin,
   isSuperAdmin,
 } = require("../middleware/authMiddleware");
 
+/* ========================================================
+   PUBLIC ROUTES (No Auth Required)
+   Put these first so they don't get trapped by middleware or /:id
+   ======================================================== */
+
+// Get active hero banner coupon for home page
+router.get("/hero", getHeroCoupon);
+
+
+/* ========================================================
+   AUTHENTICATED ROUTES (User/Customer)
+   ======================================================== */
+
+// Apply coupon code at checkout
+router.post(
+  "/apply",
+  isAuthenticated,
+  applyCoupon
+);
+
+
+/* ========================================================
+   ADMIN & SUPER ADMIN ROUTES
+   ======================================================== */
+
+// Create a new coupon
 router.post(
   "/create",
   isAuthenticated,
@@ -26,6 +51,7 @@ router.post(
   createCoupon
 );
 
+// Get list of all coupons (Admin dashboard view)
 router.get(
   "/",
   isAuthenticated,
@@ -33,13 +59,7 @@ router.get(
   getCoupons
 );
 
-router.delete(
-  "/:id",
-  isAuthenticated,
-  isAdmin,
-  deleteCoupon
-);
-
+// Toggle coupon active status
 router.put(
   "/toggle/:id",
   isAuthenticated,
@@ -47,34 +67,20 @@ router.put(
   toggleCoupon
 );
 
-router.post(
-  "/apply",
-  isAuthenticated,
-  applyCoupon
-);
-
-/* ===========================
-   HERO COUPON
-=========================== */
-
-// Public route (Home Page)
-router.get("/hero", getHeroCoupon);
-
-// Only Super Admin can change Hero Coupon
-router.put(
-  "/hero/:id",
+// Delete a coupon
+router.delete(
+  "/:id",
   isAuthenticated,
   isAdmin,
-  setHeroCoupon
+  deleteCoupon
 );
 
+// Update which coupon is featured on the hero banner
 router.put(
   "/hero/:id",
   isAuthenticated,
-  isSuperAdmin,
+  isAdmin, // Changed to Admin to match your dashboard setup requirement
   setHeroCoupon
 );
-
-router.get("/hero", getHeroCoupon);
 
 module.exports = router;

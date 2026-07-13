@@ -39,7 +39,7 @@ app.use("/api/invoice", require("./src/routes/invoiceRoutes"));
 app.use("/api/wishlist", require("./src/routes/wishlistRoutes"));
 app.use("/api/reviews", require("./src/routes/reviewRoutes"));
 
-// app.use("/api/coupons", require("./src/routes/couponRoutes"));
+app.use("/api/coupon", require("./src/routes/couponRoutes"));
 
 app.use("/api/super-admin", require("./src/routes/superAdminRoutes"));
 
