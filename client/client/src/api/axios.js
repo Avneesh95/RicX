@@ -1,8 +1,23 @@
 import axios from "axios";
 
+const hostname = window.location.hostname;
+
+// 1. Explicitly isolate local development environments
+const isLocalEnv = 
+  hostname === "localhost" || 
+  hostname === "127.0.0.1" || 
+  hostname.startsWith("192.168.") || 
+  hostname.endsWith(".local");
+
+// 2. FORCE OPTION 1: Override local logic entirely to use the production URL
+const liveBaseURL = "https://ricx.onrender.com/api";
+
 const api = axios.create({
-  baseURL: "http://localhost:4000/api",
+  baseURL: liveBaseURL,
 });
+
+// For absolute confirmation during testing, log the resolved string out
+console.log("🚀 Custom Axios BaseURL Initialized to (FORCED LIVE):", liveBaseURL);
 
 // =========================
 // REQUEST INTERCEPTOR
@@ -10,25 +25,19 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // =========================
-// RESPONSE INTERCEPTOR (IMPORTANT)
+// RESPONSE INTERCEPTOR
 // =========================
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
     console.log("❌ API ERROR:", {
       message: error.response?.data?.message || error.message,
@@ -36,7 +45,6 @@ api.interceptors.response.use(
       data: error.response?.data,
     });
 
-    // Optional: auto-handle unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       window.location.href = "/login";

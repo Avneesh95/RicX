@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:4000/api/super-admin";
+const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+export const API = isLocalhost 
+  ? "http://localhost:4000/api/super-admin" 
+  : "https://ricx.onrender.com/api/super-admin";
 
 const AdminManagement = () => {
   const [admins, setAdmins] = useState([]);

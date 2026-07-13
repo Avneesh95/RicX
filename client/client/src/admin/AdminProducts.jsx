@@ -61,12 +61,18 @@ const AdminProducts = () => {
   );
 
   // ================= IMAGE =================
-  const getImageUrl = (img) => {
-    if (!img) return "";
-    if (typeof img === "object") return img.url;
-    return `http://localhost:4000/uploads/${img}`;
-  };
+ const getImageUrl = (img) => {
+  if (!img) return "";
+  if (typeof img === "object") return img.url;
 
+  // Dynamically determine backend upload URL based on environment
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const uploadBase = isLocalhost 
+    ? "http://localhost:4000/uploads" 
+    : "https://ricx.onrender.com/uploads";
+
+  return `${uploadBase}/${img}`;
+};
   // ================= DELETE PRODUCT =================
   const handleDelete = async (id) => {
     try {

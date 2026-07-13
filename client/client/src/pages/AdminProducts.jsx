@@ -134,11 +134,18 @@ const fetchProducts = async () => {
   }
 };
   // ================= IMAGE HANDLER =================
-  const getImage = (img) => {
-    if (!img) return "https://via.placeholder.com/100";
-    if (typeof img === "object") return img.url;
-    return `http://localhost:4000/uploads/${img}`;
-  };
+const getImage = (img) => {
+  if (!img) return "https://via.placeholder.com/100";
+  if (typeof img === "object") return img.url;
+
+  // Seamless local-to-production path resolution
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const uploadBase = isLocalhost 
+    ? "http://localhost:4000/uploads" 
+    : "https://ricx.onrender.com/uploads";
+
+  return `${uploadBase}/${img}`;
+};
 
   // ================= FILTER =================
   const filtered = products.filter((p) =>
