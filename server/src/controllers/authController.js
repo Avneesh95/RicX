@@ -1,6 +1,6 @@
 const sendEmail = require("../config/mailServices");
 const User = require("../model/UserModel");
-const OTP = require("../model/OtpModel"); // ✅ FIXED (you were missing this)
+const OTP = require("../model/otpModel"); // ✅ FIXED (you were missing this)
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
