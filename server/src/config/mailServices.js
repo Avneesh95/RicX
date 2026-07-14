@@ -1,30 +1,31 @@
 const nodemailer = require("nodemailer");
-const dns = require("dns");
 
-// Force IPv4 resolution to prevent connection timeouts (ENETUNREACH / ETIMEDOUT)
-dns.setDefaultResultOrder("ipv4first");
-
+// 🟢 THE ULTIMATE FIX FOR RENDER: 
+// Hardcode Google's standard IPv4 SMTP address. 
+// This completely stops Node from trying to resolve the failing IPv6 route.
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "74.125.142.108", // This is the direct IPv4 address for smtp.gmail.com
   port: 465,
-  secure: true, // true for 465, false for other ports
+  secure: true, 
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // MUST be a 16-character App Password
+    pass: process.env.EMAIL_PASS, // Reminder: Must be a 16-character App Password
   },
   tls: {
-    // Prevents failures due to local self-signed or unauthorized certificates
-    rejectUnauthorized: false, 
+    // 👑 CRITICAL: Since we are using an IP address instead of "smtp.gmail.com",
+    // Gmail's SSL certificate will complain about a name mismatch. 
+    // This line tells Nodemailer it's okay to trust it anyway.
+    servername: "smtp.gmail.com",
+    rejectUnauthorized: false,
   },
 });
 
 const sendEmail = async (to, subject, text) => {
   try {
-    console.log("📩 Starting email...");
+    console.log("📩 Starting email via direct IPv4 channel...");
 
-    // Verify connection configuration
     await transporter.verify();
-    console.log("✅ SMTP Connected");
+    console.log("✅ SMTP Connected successfully via IPv4");
 
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -33,8 +34,8 @@ const sendEmail = async (to, subject, text) => {
       text,
     });
 
-    console.log("✅ Email sent:", info.messageId);
-    return info; // Return info so the calling function knows it succeeded
+    console.log("✅ Email sent successfully! Message ID:", info.messageId);
+    return info;
   } catch (err) {
     console.error("❌ Email Error:", err);
     throw err;
