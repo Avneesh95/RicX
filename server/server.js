@@ -1,10 +1,16 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const helmet = require("helmet"); // 🔒 Added for HTTP headers protection
 
 dotenv.config();
 
 const app = express();
+
+// =========================
+// SECURITY HEADERS
+// =========================
+app.use(helmet());
 
 // =========================
 // DATABASE
@@ -15,16 +21,14 @@ connectDB();
 // =========================
 // MIDDLEWARE (ORDER MATTERS)
 // =========================
-// 👑 Updated setup
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:4173",
-  "https://ricx.netlify.app" // Your live Netlify domain
+  "https://ricx.netlify.app"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -36,8 +40,21 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increased limits to accommodate uploads (e.g., invoices, profile pictures) safely
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// =========================
+// HEALTH CHECKS & ROOT
+// =========================
+app.get("/health", (req, res) => res.status(200).send("OK"));
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "RicX API running successfully 🚀",
+  });
+});
 
 // =========================
 // ROUTES
@@ -49,23 +66,10 @@ app.use("/api/order", require("./src/routes/orderRoutes"));
 app.use("/api/payment", require("./src/routes/paymentRoutes"));
 app.use("/api/admin", require("./src/routes/adminRoutes"));
 app.use("/api/invoice", require("./src/routes/invoiceRoutes"));
-
 app.use("/api/wishlist", require("./src/routes/wishlistRoutes"));
 app.use("/api/reviews", require("./src/routes/reviewRoutes"));
-
 app.use("/api/coupon", require("./src/routes/couponRoutes"));
-
 app.use("/api/super-admin", require("./src/routes/superAdminRoutes"));
-
-// =========================
-// HEALTH CHECK
-// =========================
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "RicX API running successfully 🚀",
-  });
-});
 
 // =========================
 // GLOBAL ERROR HANDLER (SAFE)
@@ -73,7 +77,7 @@ app.get("/", (req, res) => {
 app.use((err, req, res, next) => {
   console.error("🔥 SERVER ERROR:", err);
 
-  res.status(500).json({
+  res.status(err.status || 500).json({
     success: false,
     message: err.message || "Internal Server Error",
   });
@@ -84,6 +88,25 @@ app.use((err, req, res, next) => {
 // =========================
 const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// =========================
+// UNHANDLED EXCEPTION HANDLERS
+// =========================
+process.on("unhandledRejection", (err) => {
+  console.error("💥 UNHANDLED REJECTION! Shutting down gracefully...");
+  console.error(err);
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("💥 UNCAUGHT EXCEPTION! Shutting down gracefully...");
+  console.error(err);
+  server.close(() => {
+    process.exit(1);
+  });
 });
